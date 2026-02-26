@@ -27,54 +27,56 @@
             </div>
         </div>
 
-        <div class="sidebar-section">
-            <span class="sidebar-section-title">Conversa</span>
-            <button id="new-chat-btn" class="new-chat-btn">✨ Nova Conversa</button>
-            <ul class="nav-list">
-                <li class="nav-item active" data-section="chat">
-                    <span class="nav-icon">💬</span>
-                    <span class="nav-label">Chat Médico</span>
+        <div class="sidebar-body">
+            <div class="sidebar-section">
+                <span class="sidebar-section-title">Conversa</span>
+                <button id="new-chat-btn" class="new-chat-btn">✨ Nova Conversa</button>
+                <ul class="nav-list">
+                    <li class="nav-item active" data-section="chat">
+                        <span class="nav-icon">💬</span>
+                        <span class="nav-label">Chat Médico</span>
+                    </li>
+                    <li class="nav-item" data-section="history">
+                        <span class="nav-icon">📜</span>
+                        <span class="nav-label">Histórico</span>
+                    </li>
+                </ul>
+                <div id="conv-list" class="conv-list"></div>
+            </div>
+
+            <div class="sidebar-section">
+                <span class="sidebar-section-title">Atalhos Rápidos</span>
+                <div class="quick-actions">
+                    <button class="quick-btn" data-command="quiz" title="Gerar quiz no chat">🧠 Quiz</button>
+                    <button class="quick-btn" data-command="caso" title="Gerar caso clínico">📋 Caso Clínico</button>
+                    <button class="quick-btn" data-command="flashcard" title="Gerar flashcards">🃏 Flashcards</button>
+                    <button class="quick-btn" data-command="radiologia" title="Analisar imagem">🩻 Radiologia</button>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <span class="sidebar-section-title">Exames Suportados</span>
+                <div class="exam-tags">
+                    <span class="exam-tag">🫁 Raio-X</span>
+                    <span class="exam-tag">🧠 CT/MRI</span>
+                    <span class="exam-tag">🔬 Histopatologia</span>
+                    <span class="exam-tag">🧴 Dermatologia</span>
+                    <span class="exam-tag">👁️ Oftalmologia</span>
+                    <span class="exam-tag">📄 DICOM</span>
+                </div>
+            </div>
+
+            <ul class="nav-list nav-bottom">
+                <li class="nav-item" data-section="about">
+                    <span class="nav-icon">💡</span>
+                    <span class="nav-label">Sobre o MedGemma</span>
                 </li>
-                <li class="nav-item" data-section="history">
-                    <span class="nav-icon">📜</span>
-                    <span class="nav-label">Histórico</span>
+                <li class="nav-item" data-section="settings">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-label">Configurações</span>
                 </li>
             </ul>
-            <div id="conv-list" class="conv-list"></div>
         </div>
-
-        <div class="sidebar-section">
-            <span class="sidebar-section-title">Atalhos Rápidos</span>
-            <div class="quick-actions">
-                <button class="quick-btn" data-command="quiz" title="Gerar quiz no chat">🧠 Quiz</button>
-                <button class="quick-btn" data-command="caso" title="Gerar caso clínico">📋 Caso Clínico</button>
-                <button class="quick-btn" data-command="flashcard" title="Gerar flashcards">🃏 Flashcards</button>
-                <button class="quick-btn" data-command="radiologia" title="Analisar imagem">🩻 Radiologia</button>
-            </div>
-        </div>
-
-        <div class="sidebar-section">
-            <span class="sidebar-section-title">Exames Suportados</span>
-            <div class="exam-tags">
-                <span class="exam-tag">🫁 Raio-X</span>
-                <span class="exam-tag">🧠 CT/MRI</span>
-                <span class="exam-tag">🔬 Histopatologia</span>
-                <span class="exam-tag">🧴 Dermatologia</span>
-                <span class="exam-tag">👁️ Oftalmologia</span>
-                <span class="exam-tag">📄 DICOM</span>
-            </div>
-        </div>
-
-        <ul class="nav-list nav-bottom">
-            <li class="nav-item" data-section="about">
-                <span class="nav-icon">💡</span>
-                <span class="nav-label">Sobre o MedGemma</span>
-            </li>
-            <li class="nav-item" data-section="settings">
-                <span class="nav-icon">⚙️</span>
-                <span class="nav-label">Configurações</span>
-            </li>
-        </ul>
 
         <div class="sidebar-footer">
             <div id="connection-status" class="connection-badge disconnected">
