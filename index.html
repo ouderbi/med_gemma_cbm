@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="MedGemma CBM — Plataforma interativa de IA médica com MedGemma 27B via Vertex AI">
+    <meta name="theme-color" content="#060b18">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>MedGemma CBM — Plataforma de IA Médica</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <span class="logo-icon">🧬</span>
+                <div class="logo-text">
+                    <span class="logo-title">MedGemma</span>
+                    <span class="logo-sub">27B Multimodal</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-section">
+            <span class="sidebar-section-title">Conversa</span>
+            <button id="new-chat-btn" class="new-chat-btn">✨ Nova Conversa</button>
+            <ul class="nav-list">
+                <li class="nav-item active" data-section="chat">
+                    <span class="nav-icon">💬</span>
+                    <span class="nav-label">Chat Médico</span>
+                </li>
+                <li class="nav-item" data-section="history">
+                    <span class="nav-icon">📜</span>
+                    <span class="nav-label">Histórico</span>
+                </li>
+            </ul>
+            <div id="conv-list" class="conv-list"></div>
+        </div>
+
+        <div class="sidebar-section">
+            <span class="sidebar-section-title">Atalhos Rápidos</span>
+            <div class="quick-actions">
+                <button class="quick-btn" data-command="quiz" title="Gerar quiz no chat">🧠 Quiz</button>
+                <button class="quick-btn" data-command="caso" title="Gerar caso clínico">📋 Caso Clínico</button>
+                <button class="quick-btn" data-command="flashcard" title="Gerar flashcards">🃏 Flashcards</button>
+                <button class="quick-btn" data-command="radiologia" title="Analisar imagem">🩻 Radiologia</button>
+            </div>
+        </div>
+
+        <div class="sidebar-section">
+            <span class="sidebar-section-title">Exames Suportados</span>
+            <div class="exam-tags">
+                <span class="exam-tag">🫁 Raio-X</span>
+                <span class="exam-tag">🧠 CT/MRI</span>
+                <span class="exam-tag">🔬 Histopatologia</span>
+                <span class="exam-tag">🧴 Dermatologia</span>
+                <span class="exam-tag">👁️ Oftalmologia</span>
+                <span class="exam-tag">📄 DICOM</span>
+            </div>
+        </div>
+
+        <ul class="nav-list nav-bottom">
+            <li class="nav-item" data-section="settings">
+                <span class="nav-icon">⚙️</span>
+                <span class="nav-label">Configurações</span>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <div id="connection-status" class="connection-badge disconnected">
+                <span class="status-dot"></span>
+                <span class="status-text">Offline</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <button id="menu-toggle" class="menu-btn" aria-label="Menu">☰</button>
+        <span class="mobile-title">🧬 MedGemma CBM</span>
+    </header>
+
+    <!-- Main -->
+    <main id="main-content" class="main-content">
+
+        <!-- CHAT (main view) -->
+        <section id="section-chat" class="section active">
+            <div class="chat-container">
+                <div id="chat-messages" class="chat-messages">
+                    <div class="message assistant">
+                        <div class="message-avatar">🧬</div>
+                        <div class="message-content">
+                            <p>Olá! Sou o <strong>MedGemma 27B Multimodal</strong>. Posso te ajudar com:</p>
+                            <div class="welcome-grid">
+                                <div class="welcome-card" data-command="quiz">
+                                    <span class="wc-icon">🧠</span>
+                                    <div>
+                                        <strong>Gerar Quiz</strong>
+                                        <p>"Faça um quiz de cardiologia com 5 questões"</p>
+                                    </div>
+                                </div>
+                                <div class="welcome-card" data-command="caso">
+                                    <span class="wc-icon">📋</span>
+                                    <div>
+                                        <strong>Caso Clínico</strong>
+                                        <p>"Crie um caso clínico de emergência"</p>
+                                    </div>
+                                </div>
+                                <div class="welcome-card" data-command="flashcard">
+                                    <span class="wc-icon">🃏</span>
+                                    <div>
+                                        <strong>Flashcards</strong>
+                                        <p>"Gere flashcards sobre antibióticos"</p>
+                                    </div>
+                                </div>
+                                <div class="welcome-card" data-command="radiologia">
+                                    <span class="wc-icon">🩻</span>
+                                    <div>
+                                        <strong>Analisar Imagem</strong>
+                                        <p>"Arraste um raio-X e peça para analisar"</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <p style="margin-top:12px;color:var(--text-muted);font-size:0.85rem;">💡 Envie imagens (raio-X, CT, dermatologia, histopatologia, oftalmologia) junto com suas perguntas. Máximo 30MB por arquivo. O modelo redimensiona para 896×896px internamente.</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="chat-image-preview" class="image-preview-bar hidden">
+                    <div id="preview-thumbs" class="preview-thumbs"></div>
+                    <button id="chat-clear-imgs" class="remove-img-btn" title="Remover todas">✕</button>
+                </div>
+                <div class="chat-input-area">
+                    <label class="attach-btn" title="Anexar imagens médicas (até 30MB cada)">
+                        📎
+                        <input type="file" id="chat-file-input" accept=".jpg,.jpeg,.png,.webp,.gif,.bmp,.tiff" multiple hidden>
+                    </label>
+                    <textarea id="chat-input" placeholder="Pergunte algo, peça um quiz, envie uma imagem..." rows="1"></textarea>
+                    <button id="chat-send-btn" class="send-btn" title="Enviar">
+                        <span class="send-icon">➤</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- HISTORY -->
+        <section id="section-history" class="section">
+            <div class="section-header">
+                <h1>📜 Histórico de Conversas</h1>
+                <p class="section-desc">Suas conversas anteriores · <span id="storage-count">0 conversas salvas</span></p>
+                <div class="storage-badge">
+                    <span class="storage-icon">🔒</span>
+                    <span>Armazenamento 100% local — seus dados ficam <strong>apenas neste dispositivo</strong>. Nenhum dado é enviado para nuvem ou servidores externos.</span>
+                </div>
+            </div>
+            <div id="history-list" class="history-list">
+                <p class="empty-state">📭 Nenhuma conversa salva ainda. Suas conversas aparecerão aqui automaticamente.</p>
+            </div>
+        </section>
+
+        <!-- SETTINGS -->
+        <section id="section-settings" class="section">
+            <div class="section-header">
+                <h1>⚙️ Configurações</h1>
+                <p class="section-desc">Configure a conexão com o MedGemma via Vertex AI</p>
+            </div>
+            <div class="settings-grid">
+                <div class="settings-card">
+                    <h3>🔗 Conexão com Vertex AI</h3>
+                    <div class="form-group">
+                        <label for="set-api-base">🌐 URL do Servidor API (CORS Proxy)</label>
+                        <input type="text" id="set-api-base" placeholder="Ex: https://seu-app.render.com ou http://localhost:3000">
+                        <small style="color:var(--text-muted);font-size:0.75rem;margin-top:4px;display:block">Obrigatório se estiver usando via GitHub Pages ou localmente sem o Node.js.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="set-endpoint">📍 Endpoint MedGemma (Vertex AI)</label>
+                        <input type="text" id="set-endpoint" placeholder="https://{REGION}-aiplatform.googleapis.com/v1/projects/{ID}/locations/{REGION}/endpoints/{ID}">
+                    </div>
+                    <div class="form-group">
+                        <label for="set-apikey">🔑 Autenticação (Bear Token/Key)</label>
+                        <input type="password" id="set-apikey" placeholder="Bearer token ou API Key">
+                    </div>
+                    <div class="settings-actions">
+                        <button id="set-save-btn" class="generate-btn">💾 Salvar Configurações</button>
+                        <button id="set-test-btn" class="generate-btn secondary">🔍 Testar Conexão</button>
+                    </div>
+                    <div id="set-status" class="set-status"></div>
+                </div>
+                <div class="settings-card">
+                    <h3>🎛️ Parâmetros do Modelo</h3>
+                    <div class="form-group">
+                        <label for="set-temperature">Temperatura: <span id="temp-value">0.3</span></label>
+                        <input type="range" id="set-temperature" min="0" max="1" step="0.05" value="0.3">
+                    </div>
+                    <div class="form-group">
+                        <label for="set-maxtokens">Máximo de Tokens</label>
+                        <select id="set-maxtokens">
+                            <option value="512">512</option>
+                            <option value="1024">1024</option>
+                            <option value="2048" selected>2048</option>
+                            <option value="4096">4096</option>
+                            <option value="8192">8192</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="set-system">Prompt do Sistema</label>
+                        <textarea id="set-system" rows="4" placeholder="You are a helpful medical assistant...">You are a helpful medical assistant. Sempre responda em português do Brasil.</textarea>
+                    </div>
+                </div>
+                <div class="settings-card full">
+                    <h3>📖 Guia Rápido de Configuração</h3>
+                    <div class="guide-steps">
+                        <div class="guide-step"><span class="step-num">1</span><div><strong>Faça o deploy do MedGemma no Vertex AI</strong><p>Acesse o <a href="https://console.cloud.google.com/vertex-ai/publishers/google/model-garden/medgemma" target="_blank">Model Garden</a> e faça o deploy do MedGemma 27B Multimodal.</p></div></div>
+                        <div class="guide-step"><span class="step-num">2</span><div><strong>Copie a URL do Endpoint</strong><p>Após o deploy, copie a URL do endpoint gerado e cole no campo acima.</p></div></div>
+                        <div class="guide-step"><span class="step-num">3</span><div><strong>Autenticação</strong><p>Execute <code>gcloud auth application-default login</code> ou cole o access token.</p></div></div>
+                        <div class="guide-step"><span class="step-num">4</span><div><strong>Pronto!</strong><p>Agora é só conversar, gerar quizzes, analisar imagens e muito mais!</p></div></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
