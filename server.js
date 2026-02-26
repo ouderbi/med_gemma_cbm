@@ -141,11 +141,15 @@ app.post('/api/chat', async (req, res) => {
 
         const data = await response.json();
         
-        // Vertex AI wraps response in predictions array
+        // Vertex AI wraps response in predictions array or object
         // Extract the OpenAI-compatible response from predictions
-        if (data.predictions && data.predictions[0]) {
-            let prediction = data.predictions[0];
-            
+        const hasPredictions = data.predictions !== undefined;
+        let prediction = null;
+        if (hasPredictions) {
+            prediction = Array.isArray(data.predictions) ? data.predictions[0] : data.predictions;
+        }
+
+        if (prediction) {
             // Handle if prediction is a single-item list containing a dict
             if (Array.isArray(prediction) && prediction.length > 0) {
                 prediction = prediction[0];
