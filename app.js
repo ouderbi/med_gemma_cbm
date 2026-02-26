@@ -30,7 +30,7 @@
         db: null,
         currentConvId: null,
         settings: {
-            apiBaseUrl: 'https://petite-monkeys-wear.loca.lt', // Auto-configured for this session
+            apiBaseUrl: 'https://medgemma-proxy-vba6c7p3la-uc.a.run.app', // Final permanent cloud URL
             endpointUrl: '',
             apiKey: '',
             temperature: 0.3,
