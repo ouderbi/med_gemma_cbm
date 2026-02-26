@@ -31,7 +31,7 @@
         currentConvId: null,
         settings: {
             apiBaseUrl: 'https://medgemma-proxy-vba6c7p3la-uc.a.run.app', // Final permanent cloud URL
-            endpointUrl: '',
+            endpointUrl: 'https://3136194740265943040.us-central1-927344461840.prediction.vertexai.goog/v1/projects/927344461840/locations/us-central1/endpoints/mg-endpoint-a0838ce4-a75a-414e-ba8c-728179e23c68',
             apiKey: '',
             temperature: 0.3,
             maxTokens: 2048,
