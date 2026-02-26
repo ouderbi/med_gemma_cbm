@@ -5,9 +5,10 @@ const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const { GoogleAuth } = require('google-auth-library');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080; // Changed default for Cloud Run
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
@@ -34,26 +35,45 @@ const upload = multer({
 // ============================================================
 // Get access token for Vertex AI
 // ============================================================
-function getAccessToken() {
-    // First try env var
+// ============================================================
+// Get access token for Vertex AI
+// ============================================================
+let authClient = null;
+
+async function getAccessToken() {
+    // 1. Try environment variable (manual override)
     if (process.env.VERTEX_API_KEY) {
         return process.env.VERTEX_API_KEY;
     }
-    // Fall back to gcloud CLI (try application-default first, then standard)
+
+    // 2. Try Google Auth Library (Best for Cloud Run/Production)
+    try {
+        if (!authClient) {
+            authClient = new GoogleAuth({
+                scopes: 'https://www.googleapis.com/auth/cloud-platform'
+            });
+        }
+        const token = await authClient.getAccessToken();
+        if (token) return token;
+    } catch (e) {
+        console.log('[Auth] GoogleAuth library fallback to CLI...');
+    }
+
+    // 3. Last resort: Fallback to gcloud CLI (Local development)
     try {
         try {
             return execSync('gcloud auth application-default print-access-token', {
                 encoding: 'utf-8',
-                timeout: 10000
+                timeout: 5000
             }).trim();
         } catch (e) {
             return execSync('gcloud auth print-access-token', {
                 encoding: 'utf-8',
-                timeout: 10000
+                timeout: 5000
             }).trim();
         }
     } catch (e) {
-        console.error('Failed to get access token. Run: gcloud auth application-default login');
+        console.error('Failed to get access token. Cloud Run: Ensure Service Account has Vertex AI User role. Local: Run gcloud auth application-default login');
         return null;
     }
 }
@@ -72,7 +92,7 @@ app.post('/api/chat', async (req, res) => {
             });
         }
 
-        const accessToken = getAccessToken();
+        const accessToken = await getAccessToken();
         if (!accessToken) {
             return res.status(401).json({
                 error: 'No access token available. Run: gcloud auth application-default login'
@@ -213,9 +233,9 @@ app.get('/api/limits', (req, res) => {
 // ============================================================
 // GET /api/health — Check server status
 // ============================================================
-app.get('/api/health', (req, res) => {
+app.get('/api/health', async (req, res) => {
     const hasEndpoint = !!process.env.MEDGEMMA_ENDPOINT_URL;
-    const hasToken = !!getAccessToken();
+    const hasToken = !!(await getAccessToken());
     res.json({
         status: 'ok',
         endpointConfigured: hasEndpoint,
