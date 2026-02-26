@@ -779,6 +779,10 @@ Use spoiler:true para Diagnóstico Final e Plano de Conduta. Responda em portugu
     // Text Formatting
     // ============================================================
     function formatText(text) {
+        if (typeof marked !== 'undefined') {
+            return marked.parse(text);
+        }
+        // Fallback if marked is somehow blocked
         return '<p>' + text
             .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
             .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
