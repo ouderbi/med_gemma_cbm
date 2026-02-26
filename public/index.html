@@ -1,321 +1,291 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="ocean">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="description" content="MedGemma CBM — Plataforma interativa de IA médica com MedGemma 27B via Vertex AI">
-    <meta name="theme-color" content="#060b18">
+    <meta name="description" content="MedGemma CBM — Plataforma interativa de IA médica">
+    <meta name="theme-color" content="#0a0a0a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>MedGemma CBM — Plataforma de IA Médica</title>
+    <title>MedGemma CBM — IA Médica Especialista</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
-    <!-- Sidebar -->
-    <nav id="sidebar" class="sidebar">
-        <div class="sidebar-header">
-            <div class="logo">
-                <span class="logo-icon">🧬</span>
-                <div class="logo-text">
-                    <span class="logo-title">MedGemma</span>
-                    <span class="logo-sub">27B Multimodal</span>
-                </div>
-            </div>
-        </div>
+    <!-- Dynamic Mesh Gradient Background -->
+    <div id="ambient-mesh">
+        <div class="mesh-blob blob-1"></div>
+        <div class="mesh-blob blob-2"></div>
+        <div class="mesh-blob blob-3"></div>
+        <div class="mesh-blob blob-4"></div>
+    </div>
 
-        <div class="sidebar-body">
-            <div class="sidebar-section">
-                <span class="sidebar-section-title">Conversa</span>
-                <button id="new-chat-btn" class="new-chat-btn">✨ Nova Conversa</button>
-                <ul class="nav-list">
-                    <li class="nav-item active" data-section="chat">
-                        <span class="nav-icon">💬</span>
-                        <span class="nav-label">Chat Médico</span>
-                    </li>
-                    <li class="nav-item" data-section="history">
-                        <span class="nav-icon">📜</span>
-                        <span class="nav-label">Histórico</span>
-                    </li>
-                </ul>
-                <div id="conv-list" class="conv-list"></div>
-            </div>
-
-            <div class="sidebar-section">
-                <span class="sidebar-section-title">Atalhos Rápidos</span>
-                <div class="quick-actions">
-                    <button class="quick-btn" data-command="quiz" title="Gerar quiz no chat">🧠 Quiz</button>
-                    <button class="quick-btn" data-command="caso" title="Gerar caso clínico">📋 Caso Clínico</button>
-                    <button class="quick-btn" data-command="flashcard" title="Gerar flashcards">🃏 Flashcards</button>
-                    <button class="quick-btn" data-command="radiologia" title="Analisar imagem">🩻 Radiologia</button>
-                </div>
-            </div>
-
-            <div class="sidebar-section">
-                <span class="sidebar-section-title">Exames Suportados</span>
-                <div class="exam-tags">
-                    <span class="exam-tag">🫁 Raio-X</span>
-                    <span class="exam-tag">🧠 CT/MRI</span>
-                    <span class="exam-tag">🔬 Histopatologia</span>
-                    <span class="exam-tag">🧴 Dermatologia</span>
-                    <span class="exam-tag">👁️ Oftalmologia</span>
-                    <span class="exam-tag">📄 DICOM</span>
-                </div>
-            </div>
-
-            <ul class="nav-list nav-bottom">
-                <li class="nav-item" data-section="about">
-                    <span class="nav-icon">💡</span>
-                    <span class="nav-label">Sobre o MedGemma</span>
-                </li>
-                <li class="nav-item" data-section="settings">
-                    <span class="nav-icon">⚙️</span>
-                    <span class="nav-label">Configurações</span>
-                </li>
-            </ul>
-
-            <div class="sidebar-section">
-                <span class="sidebar-section-title">🎨 Tema</span>
-                <div class="theme-picker" id="theme-picker">
-                    <button class="theme-dot active" data-theme="gemini-dark" title="Escuro Gemini" style="background:#131314;border-color:#8ab4f8;"></button>
-                    <button class="theme-dot" data-theme="ocean" title="Oceano" style="background:#0d1b2a;border-color:#48cae4;"></button>
-                    <button class="theme-dot" data-theme="emerald" title="Esmeralda" style="background:#0a1a0f;border-color:#34d399;"></button>
-                    <button class="theme-dot" data-theme="rose" title="Rosé" style="background:#1a0a14;border-color:#f472b6;"></button>
-                    <button class="theme-dot" data-theme="amber" title="Âmbar" style="background:#1a1408;border-color:#fbbf24;"></button>
-                    <button class="theme-dot" data-theme="lavender" title="Lavanda" style="background:#140f1a;border-color:#a78bfa;"></button>
-                    <button class="theme-dot" data-theme="sunset" title="Pôr do Sol" style="background:#1a0f08;border-color:#fb923c;"></button>
-                    <button class="theme-dot" data-theme="light" title="Claro" style="background:#f8f9fa;border-color:#1a73e8;"></button>
-                </div>
-            </div>
-        </div>
-
-        <div class="sidebar-footer">
-            <div id="connection-status" class="connection-badge disconnected">
-                <span class="status-dot"></span>
-                <span class="status-text">Offline</span>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Mobile Header -->
+    <!-- Mobile Header (Glass) -->
     <header class="mobile-header">
-        <button id="menu-toggle" class="menu-btn" aria-label="Menu">☰</button>
-        <span class="mobile-title">🧬 MedGemma CBM</span>
+        <button id="menu-toggle" class="menu-btn" aria-label="Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="mobile-logo-text">🧬 MedGemma</div>
     </header>
 
-    <!-- Main -->
-    <main id="main-content" class="main-content">
+    <div class="app-layout">
+        <!-- Floating Navigation Island -->
+        <nav id="sidebar" class="nav-island">
+            <div class="island-header">
+                <div class="logo">
+                    <div class="logo-glow">🧬</div>
+                    <div class="logo-text">
+                        <span class="logo-title">MedGemma</span>
+                        <span class="logo-sub">27B Inteligence</span>
+                    </div>
+                </div>
+            </div>
 
-        <!-- CHAT (main view) -->
-        <section id="section-chat" class="section active">
-            <div class="chat-container">
-                <div id="chat-messages" class="chat-messages">
-                    <div class="message assistant">
-                        <div class="message-avatar">🧬</div>
-                        <div class="message-content">
-                            <p>Olá! Sou o <strong>MedGemma 27B Multimodal</strong>. Posso te ajudar com:</p>
-                            <div class="welcome-grid">
-                                <div class="welcome-card" data-command="quiz">
-                                    <span class="wc-icon">🧠</span>
-                                    <div>
-                                        <strong>Gerar Quiz</strong>
-                                        <p>"Faça um quiz de cardiologia com 5 questões"</p>
+            <div class="island-body">
+                <button id="new-chat-btn" class="modern-btn primary shine-effect">
+                    <span class="icon">✨</span> Nova Conversa
+                </button>
+
+                <div class="island-section">
+                    <span class="section-label">Portal Clínico</span>
+                    <ul class="nav-list">
+                        <li class="nav-item active" data-section="chat">
+                            <span class="nav-icon">💬</span> Chat Médico
+                        </li>
+                        <li class="nav-item" data-section="history">
+                            <span class="nav-icon">📜</span> Histórico
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="island-section">
+                    <span class="section-label">Conversas Recentes</span>
+                    <div id="conv-list" class="conv-list custom-scroll"></div>
+                </div>
+
+                <div class="island-section">
+                    <span class="section-label">Sistema & Layout</span>
+                    <ul class="nav-list">
+                        <li class="nav-item" data-section="about">
+                            <span class="nav-icon">💡</span> Sobre a Plataforma
+                        </li>
+                        <li class="nav-item" data-section="settings">
+                            <span class="nav-icon">⚙️</span> Configurações
+                        </li>
+                    </ul>
+                    <div class="theme-picker" id="theme-picker">
+                        <button class="theme-dot" data-theme="gemini-dark" style="background:#0a0a0a"></button>
+                        <button class="theme-dot active" data-theme="ocean" style="background:#0d1b2a"></button>
+                        <button class="theme-dot" data-theme="emerald" style="background:#0a1a0f"></button>
+                        <button class="theme-dot" data-theme="rose" style="background:#1a0a14"></button>
+                        <button class="theme-dot" data-theme="amber" style="background:#1a1408"></button>
+                        <button class="theme-dot" data-theme="lavender" style="background:#140f1a"></button>
+                        <button class="theme-dot" data-theme="light" style="background:#f8f9fa"></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="island-footer">
+                <div id="connection-status" class="status-pill disconnected">
+                    <div class="pulse-ring"></div>
+                    <span class="status-text">Offline</span>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Workspace Area -->
+        <main id="main-content" class="workspace">
+            
+            <!-- CHAT SECTION -->
+            <section id="section-chat" class="section active">
+                <div class="chat-wrapper">
+                    <div id="chat-messages" class="chat-messages custom-scroll">
+                        
+                        <!-- Premium Welcome Hero / Bento Grid -->
+                        <div class="welcome-hero">
+                            <div class="hero-badge">Acesso Avançado</div>
+                            <h1 class="hero-title">
+                                Olá. Eu sou o <span class="text-gradient">MedGemma</span>
+                            </h1>
+                            <p class="hero-subtitle">Inteligência clínica de nível especialista projetada com foco em cognição e precisão médica.</p>
+                            
+                            <!-- Bento Grid for Quick Actions -->
+                            <div class="bento-grid">
+                                <div class="bento-card welcome-card" data-command="quiz">
+                                    <div class="card-glow"></div>
+                                    <div class="bento-icon">🧠</div>
+                                    <div class="bento-content">
+                                        <h3>Gerar Quiz</h3>
+                                        <p>Treine seus conhecimentos clínicos.</p>
                                     </div>
                                 </div>
-                                <div class="welcome-card" data-command="caso">
-                                    <span class="wc-icon">📋</span>
-                                    <div>
-                                        <strong>Caso Clínico</strong>
-                                        <p>"Crie um caso clínico de emergência"</p>
+                                <div class="bento-card welcome-card" data-command="caso">
+                                    <div class="card-glow"></div>
+                                    <div class="bento-icon">📋</div>
+                                    <div class="bento-content">
+                                        <h3>Estudo de Caso</h3>
+                                        <p>Simulações avançadas de pacientes.</p>
                                     </div>
                                 </div>
-                                <div class="welcome-card" data-command="flashcard">
-                                    <span class="wc-icon">🃏</span>
-                                    <div>
-                                        <strong>Flashcards</strong>
-                                        <p>"Gere flashcards sobre antibióticos"</p>
+                                <div class="bento-card welcome-card span-2" data-command="radiologia">
+                                    <div class="card-glow"></div>
+                                    <div class="card-bg-img medical-img"></div>
+                                    <div class="bento-icon">🩻</div>
+                                    <div class="bento-content">
+                                        <h3>Análise Radiológica</h3>
+                                        <p>Envie imagens de Raio-X, CT ou ressonância magnética para extração de laudos estruturados com visão computacional multimodal.</p>
                                     </div>
                                 </div>
-                                <div class="welcome-card" data-command="radiologia">
-                                    <span class="wc-icon">🩻</span>
-                                    <div>
-                                        <strong>Analisar Imagem</strong>
-                                        <p>"Arraste um raio-X e peça para analisar"</p>
+                                <div class="bento-card welcome-card" data-command="flashcard">
+                                    <div class="card-glow"></div>
+                                    <div class="bento-icon">🃏</div>
+                                    <div class="bento-content">
+                                        <h3>Flashcards</h3>
+                                        <p>Resumos memoráveis rápidos.</p>
                                     </div>
                                 </div>
                             </div>
-                            <p style="margin-top:12px;color:var(--text-muted);font-size:0.85rem;">💡 Envie imagens (raio-X, CT, dermatologia, histopatologia, oftalmologia) junto com suas perguntas. Máximo 30MB por arquivo. O modelo redimensiona para 896×896px internamente.</p>
+                        </div>
+
+                    </div>
+
+                    <!-- Floating Interaction Dock -->
+                    <div class="interaction-dock-wrapper">
+                        <!-- Image Preview Overlay -->
+                        <div id="chat-image-preview" class="image-preview-glass hidden">
+                            <div id="preview-thumbs" class="preview-thumbs custom-scroll"></div>
+                            <button id="chat-clear-imgs" class="glass-btn icon-btn" title="Remover imagens">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 6L6 18M6 6l12 12" stroke-width="2" stroke-linecap="round"/></svg>
+                            </button>
+                        </div>
+
+                        <!-- Main Input Pill -->
+                        <div class="input-pill">
+                            <label class="dock-btn" title="Anexar Imagens e PDFs">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+                                <input type="file" id="chat-file-input" accept=".jpg,.jpeg,.png,.webp,.gif,.bmp,.tiff,.tif,.pdf" multiple hidden>
+                            </label>
+                            
+                            <label class="dock-btn camera-btn" title="Usar a Câmera">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                                <input type="file" id="chat-camera-input" accept="image/*" capture="environment" hidden>
+                            </label>
+
+                            <textarea id="chat-input" placeholder="Converse com a inteligência médica..." rows="1"></textarea>
+                            
+                            <button id="chat-send-btn" class="send-action-btn glass-btn" aria-label="Enviar">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                            </button>
                         </div>
                     </div>
                 </div>
-                <div id="chat-image-preview" class="image-preview-bar hidden">
-                    <div id="preview-thumbs" class="preview-thumbs"></div>
-                    <button id="chat-clear-imgs" class="remove-img-btn" title="Remover todas">✕</button>
-                </div>
-                <div class="chat-input-area">
-                    <label class="attach-btn" title="Anexar imagens médicas ou PDFs (até 30MB)">
-                        📎
-                        <input type="file" id="chat-file-input" accept=".jpg,.jpeg,.png,.webp,.gif,.bmp,.tiff,.tif,.pdf" multiple hidden>
-                    </label>
-                    <label class="attach-btn camera-btn" title="Capturar foto com a câmera">
-                        📷
-                        <input type="file" id="chat-camera-input" accept="image/*" capture="environment" hidden>
-                    </label>
-                    <textarea id="chat-input" placeholder="Pergunte algo, peça um quiz, envie uma imagem..." rows="1"></textarea>
-                    <button id="chat-send-btn" class="send-btn" title="Enviar">
-                        <span class="send-icon">➤</span>
-                    </button>
-                </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- HISTORY -->
-        <section id="section-history" class="section">
-            <div class="section-header">
-                <h1>📜 Histórico de Conversas</h1>
-                <p class="section-desc">Suas conversas anteriores · <span id="storage-count">0 conversas salvas</span></p>
-                <div class="storage-badge">
-                    <span class="storage-icon">🔒</span>
-                    <span>Armazenamento 100% local — seus dados ficam <strong>apenas neste dispositivo</strong>. Nenhum dado é enviado para nuvem ou servidores externos.</span>
+            <!-- HISTORY SECTION -->
+            <section id="section-history" class="section">
+                <div class="content-container">
+                    <header class="page-header">
+                        <h2>Histórico Clínico</h2>
+                        <p>Seus logs de interação com privacidade local absoluta. <span id="storage-count" class="badge">0</span></p>
+                    </header>
+                    <div id="history-list" class="glass-list">
+                        <div class="empty-state">
+                            <span class="empty-icon">📂</span>
+                            <p>Nenhum log gravado no repositório seguro local.</p>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div id="history-list" class="history-list">
-                <p class="empty-state">📭 Nenhuma conversa salva ainda. Suas conversas aparecerão aqui automaticamente.</p>
-            </div>
-        </section>
+            </section>
 
-        <!-- ABOUT MEDGEMMA -->
-        <section id="section-about" class="section">
-            <div class="section-header">
-                <h1 style="display: flex; align-items: center; gap: 12px;"><span style="filter: drop-shadow(0 0 10px var(--accent-glow));">💡</span> Sobre a Plataforma</h1>
-                <p class="section-desc">Entenda a tecnologia por trás desta interface e o que torna o MedGemma único em saúde</p>
-            </div>
-            
-            <div class="settings-grid" style="align-content: start; overflow-y: auto; padding-right: 15px; padding-bottom: 30px;">
-                
-                <!-- CREDITS CARD (FEATURED) -->
-                <div class="settings-card full" style="border: 1px solid var(--accent); background: linear-gradient(135deg, rgba(0, 212, 170, 0.05), rgba(14, 165, 233, 0.05)); position: relative; overflow: hidden;">
-                    <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: var(--accent-gradient); opacity: 0.1; filter: blur(40px); border-radius: 50%;"></div>
-                    <h3 style="color: var(--accent); font-size: 1.15rem; margin-bottom: 12px; display: flex; align-items: center; gap: 10px;">
-                        <span>👨‍💻</span> Desenvolvimento da Interface
-                    </h3>
-                    <p style="margin-bottom: 12px; line-height: 1.6; color: var(--text-primary); font-size: 0.95rem;">
-                        Toda esta plataforma web responsiva, o design "Dark Premium" (Material Glassmorphism), a integração de leitura de imagens locais, o processamento de áudio (se aplicado) e a arquitetura segura de chat conectada ao SDK do Vertex AI, <strong>foram construídos e idealizados por Ouderbi</strong>.
-                    </p>
-                    <p style="line-height: 1.6; color: var(--text-secondary); font-size: 0.9rem;">
-                        O objetivo da criação desta interface foi democratizar o acesso ao poderoso modelo MedGemma hospedado no Google Cloud (GCP). Todo o tráfego ocorre localmente (na nuvem pessoal do usuário), para garantir privacidade total dos dados médicos, demonstrando habilidades avançadas em <em>Front-end Engineering</em>, <em>Prompt Design</em> e Integrações de Nuvem.
-                    </p>
+            <!-- ABOUT SECTION -->
+            <section id="section-about" class="section">
+                <div class="content-container">
+                    <header class="page-header">
+                        <h2>Sobre a Interface</h2>
+                        <p>A arquitetura mental e digital por trás do projeto.</p>
+                    </header>
+                    <div class="bento-grid about-grid">
+                        <div class="bento-card span-2 highlight-card">
+                            <div class="card-glow"></div>
+                            <h3>👨‍💻 Engenharia de Interface</h3>
+                            <p>Desenvolvido focado na <em>Psicologia do Design</em> para reduzir a carga cognitiva, promovendo uma navegação espacial fluida.</p>
+                            <p class="muted-text mt-2">Construído e idealizado por <strong>Ouderbi</strong> visando a democratização da inteligência especializada, unindo requinte estético ao MedGemma.</p>
+                        </div>
+                        <div class="bento-card">
+                            <h3>🧬 MedGemma (27B)</h3>
+                            <p>Especialista multimodal focado em alta complexidade médica, raciocínio diagnóstico e visão computacional radiológica baseada em Vertex AI.</p>
+                        </div>
+                    </div>
                 </div>
+            </section>
 
-                <!-- MEDGEMMA EXPLANATION -->
-                <div class="settings-card full">
-                    <h3 style="margin-bottom: 12px; display: flex; align-items: center; gap: 10px;"><span>🧬</span> O que é o MedGemma?</h3>
-                    <p style="margin-bottom: 15px; line-height: 1.6; color: var(--text-secondary);">
-                        O <strong>MedGemma</strong> é uma versão altamente especializada da família de modelos abertos <em>Gemma</em> (desenvolvida pela equipe do Google DeepMind).
-                    </p>
-                    <p style="margin-bottom: 15px; line-height: 1.6; color: var(--text-secondary);">
-                        Enquanto a vasta maioria das IAs são criadas de forma generalista (ex: ChatGPT, Gemini Comum), o MedGemma passou por um rigoroso treinamento focado estritamente em <strong>raciocínio clínico, compreensão de anatomia estruturada e precisão diagnóstica</strong> de nível especialista. Suporta multimodalidade avançada para interpretar exames complexos (Raio-X, CT, Histopatologia).
-                    </p>
-                    <div style="background: rgba(0, 224, 184, 0.08); border-left: 3px solid var(--accent); padding: 12px 16px; border-radius: 4px; margin-top: 10px;">
-                        <strong style="color: var(--text-primary); display: block; margin-bottom: 6px;">🔗 Links Oficiais de Pesquisa (Google DeepMind):</strong>
-                        <a href="https://deepmind.google/models/gemma/medgemma/" target="_blank" style="color: var(--accent); display: block; margin-bottom: 4px; text-decoration: none;">📄 Landing Page do MedGemma</a>
-                        <a href="https://blog.google/technology/health/google-ai-healthcare-models/" target="_blank" style="color: var(--accent); display: inline-block; text-decoration: none;">📰 Publicação Oficial no Blog do Google</a>
-                    </div>
-                </div>
+            <!-- SETTINGS SECTION -->
+            <section id="section-settings" class="section">
+                <div class="content-container">
+                    <header class="page-header">
+                        <h2>Workspace Config</h2>
+                        <p>Gerenciamento de recursos do Vertex AI Pipeline.</p>
+                    </header>
+                    
+                    <div class="settings-form-grid">
+                        <div class="glass-card">
+                            <div class="card-header">
+                                <span class="card-icon">🔌</span>
+                                <h3>Conexão Vertex AI</h3>
+                            </div>
+                            <div class="form-group modern-input">
+                                <label for="set-api-base">API Base Proxy</label>
+                                <input type="text" id="set-api-base" placeholder="https://proxy-url.run.app">
+                            </div>
+                            <div class="form-group modern-input">
+                                <label for="set-endpoint">Vertex Endpoint ID</label>
+                                <input type="text" id="set-endpoint" placeholder="https://us-central1-aiplatform...">
+                            </div>
+                            <div class="form-group modern-input">
+                                <label for="set-apikey">GCP Bearer Token (Auth)</label>
+                                <input type="password" id="set-apikey" placeholder="ya29.c.c0AY...">
+                            </div>
+                            <div class="action-row">
+                                <button id="set-save-btn" class="modern-btn primary">Salvar Alterações</button>
+                                <button id="set-test-btn" class="modern-btn glass">Testar Conexão</button>
+                            </div>
+                            <div id="set-status" class="status-msg mt-3"></div>
+                        </div>
 
-                <!-- COMPARISON: GEMINI -->
-                <div class="settings-card">
-                    <h3 style="color: var(--text-primary); margin-bottom: 14px;">♊ O Gemini Comum</h3>
-                    <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px; font-size: 0.9rem;">
-                        É um modelo <strong>Generalista</strong> projetado para servir um usuário comum em dezenas de cenários do dia a dia.
-                    </p>
-                    <ul style="color: var(--text-secondary); line-height: 1.6; padding-left: 20px; font-size: 0.9rem;">
-                        <li style="margin-bottom: 8px;"><strong>Treinamento Amplo:</strong> Treinado em um vasto corpus de dados de internet aberta, jornais, Wikipedia, códigos de programação e até culinária.</li>
-                        <li style="margin-bottom: 8px;"><strong>Foco:</strong> Chat criativo, resumo de PDFs genéricos, tradução e assistente virtual geral.</li>
-                        <li><strong>Déficit Médico:</strong> Na medicina avançada, ele tende a dar conselhos genéricos ou alucinar (inventar) condutas, pois seu conhecimento do jargão e do <em>Clinical Pathway</em> (protocolo clínico) é diluído.</li>
-                    </ul>
+                        <div class="glass-card">
+                            <div class="card-header">
+                                <span class="card-icon">🎛️</span>
+                                <h3>Parâmetros de Inferência</h3>
+                            </div>
+                            <div class="slider-group">
+                                <label for="set-temperature">Temperatura: <span id="temp-value" class="highlight-val">0.3</span></label>
+                                <input type="range" id="set-temperature" class="modern-slider" min="0" max="1" step="0.05" value="0.3">
+                            </div>
+                            <div class="form-group modern-input mt-3">
+                                <label for="set-maxtokens">Max Output Context (Tokens)</label>
+                                <select id="set-maxtokens">
+                                    <option value="512">512 Tokens</option>
+                                    <option value="1024">1024 Tokens</option>
+                                    <option value="2048" selected>2048 Tokens</option>
+                                    <option value="4096">4096 Tokens</option>
+                                    <option value="8192">8192 Tokens</option>
+                                </select>
+                            </div>
+                            <div class="form-group modern-input mt-3">
+                                <label for="set-system">System Instruction (Prompt)</label>
+                                <textarea id="set-system" rows="3" class="custom-scroll">You are a helpful medical assistant. Sempre responda em português do Brasil.</textarea>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+            </section>
+        </main>
+    </div>
 
-                <!-- COMPARISON: MEDGEMMA -->
-                <div class="settings-card" style="border: 1px solid rgba(0, 212, 170, 0.4); background: rgba(0, 212, 170, 0.02); box-shadow: inset 0 0 20px rgba(0, 212, 170, 0.05);">
-                    <h3 style="color: var(--accent); margin-bottom: 14px;">🧬 O MedGemma 27B</h3>
-                    <p style="color: var(--text-primary); line-height: 1.6; margin-bottom: 12px; font-size: 0.9rem;">
-                        É um modelo <strong>Especialista Clínico</strong> projetado por e para instituições de saúde.
-                    </p>
-                    <ul style="color: var(--text-secondary); line-height: 1.6; padding-left: 20px; font-size: 0.9rem;">
-                        <li style="margin-bottom: 8px;"><strong>Dados Curados:</strong> Ajustado quase que inteiramente em conhecimento médico curado por humanos (revistas científicas do PubMed e benchmarks internacionais hiper-rígidos como o MedQA).</li>
-                        <li style="margin-bottom: 8px;"><strong>Raciocínio Diagnóstico:</strong> Ele segue um padrão lógico de conduta clínica, avaliando hipóteses e diagnósticos diferenciais ao invés de pular para conclusões baseadas em web-search.</li>
-                        <li><strong>Precisão Terminológica:</strong> Não dilui jargões. Conhece semiologia, interações medicamentosas avançadas e "fala" como um radiologista ou clínico sênior.</li>
-                    </ul>
-                </div>
-            </div>
-        </section>
-
-        <!-- SETTINGS -->
-        <section id="section-settings" class="section">
-            <div class="section-header">
-                <h1>⚙️ Configurações</h1>
-                <p class="section-desc">Configure a conexão com o MedGemma via Vertex AI</p>
-            </div>
-            <div class="settings-grid">
-                <div class="settings-card">
-                    <h3>🔗 Conexão com Vertex AI</h3>
-                    <div class="form-group">
-                        <label for="set-api-base">🌐 URL do Servidor API (CORS Proxy)</label>
-                        <input type="text" id="set-api-base" placeholder="Ex: https://seu-app.render.com ou http://localhost:3000">
-                        <small style="color:var(--text-muted);font-size:0.75rem;margin-top:4px;display:block">Obrigatório se estiver usando via GitHub Pages ou localmente sem o Node.js.</small>
-                    </div>
-                    <div class="form-group">
-                        <label for="set-endpoint">📍 Endpoint MedGemma (Vertex AI)</label>
-                        <input type="text" id="set-endpoint" placeholder="https://{REGION}-aiplatform.googleapis.com/v1/projects/{ID}/locations/{REGION}/endpoints/{ID}">
-                    </div>
-                    <div class="form-group">
-                        <label for="set-apikey">🔑 Autenticação (Bear Token/Key)</label>
-                        <input type="password" id="set-apikey" placeholder="Bearer token ou API Key">
-                    </div>
-                    <div class="settings-actions">
-                        <button id="set-save-btn" class="generate-btn">💾 Salvar Configurações</button>
-                        <button id="set-test-btn" class="generate-btn secondary">🔍 Testar Conexão</button>
-                    </div>
-                    <div id="set-status" class="set-status"></div>
-                </div>
-                <div class="settings-card">
-                    <h3>🎛️ Parâmetros do Modelo</h3>
-                    <div class="form-group">
-                        <label for="set-temperature">Temperatura: <span id="temp-value">0.3</span></label>
-                        <input type="range" id="set-temperature" min="0" max="1" step="0.05" value="0.3">
-                    </div>
-                    <div class="form-group">
-                        <label for="set-maxtokens">Máximo de Tokens</label>
-                        <select id="set-maxtokens">
-                            <option value="512">512</option>
-                            <option value="1024">1024</option>
-                            <option value="2048" selected>2048</option>
-                            <option value="4096">4096</option>
-                            <option value="8192">8192</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="set-system">Prompt do Sistema</label>
-                        <textarea id="set-system" rows="4" placeholder="You are a helpful medical assistant...">You are a helpful medical assistant. Sempre responda em português do Brasil.</textarea>
-                    </div>
-                </div>
-                <div class="settings-card full">
-                    <h3>📖 Guia Rápido de Configuração</h3>
-                    <div class="guide-steps">
-                        <div class="guide-step"><span class="step-num">1</span><div><strong>Faça o deploy do MedGemma no Vertex AI</strong><p>Acesse o <a href="https://console.cloud.google.com/vertex-ai/publishers/google/model-garden/medgemma" target="_blank">Model Garden</a> e faça o deploy do MedGemma 27B Multimodal.</p></div></div>
-                        <div class="guide-step"><span class="step-num">2</span><div><strong>Copie a URL do Endpoint</strong><p>Após o deploy, copie a URL do endpoint gerado e cole no campo acima.</p></div></div>
-                        <div class="guide-step"><span class="step-num">3</span><div><strong>Autenticação</strong><p>Execute <code>gcloud auth application-default login</code> ou cole o access token.</p></div></div>
-                        <div class="guide-step"><span class="step-num">4</span><div><strong>Pronto!</strong><p>Agora é só conversar, gerar quizzes, analisar imagens e muito mais!</p></div></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
+    <!-- Scripts -->
     <script src="app.js"></script>
 </body>
 </html>
