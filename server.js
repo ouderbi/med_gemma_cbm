@@ -85,10 +85,11 @@ app.post('/api/chat', async (req, res) => {
     try {
         const { messages, max_tokens, temperature, stream } = req.body;
 
-        const endpointUrl = process.env.MEDGEMMA_ENDPOINT_URL;
+        // Prefer the endpoint URL sent by the client frontend if it exists.
+        const endpointUrl = req.body.endpointUrl || process.env.MEDGEMMA_ENDPOINT_URL;
         if (!endpointUrl) {
             return res.status(500).json({
-                error: 'MEDGEMMA_ENDPOINT_URL not configured. Deploy MedGemma on Vertex AI first, then set the endpoint URL in .env'
+                error: 'MEDGEMMA_ENDPOINT_URL not configured. Provide it in the frontend settings or backend .env.'
             });
         }
 
@@ -206,9 +207,11 @@ app.post('/api/upload', (req, res) => {
         if (!req.file) {
             return res.status(400).json({ error: 'Nenhuma imagem enviada.' });
         }
+        
         const base64 = req.file.buffer.toString('base64');
         const mimeType = req.file.mimetype;
-        res.json({
+        
+        return res.json({
             base64: base64,
             mimeType: mimeType,
             dataUrl: `data:${mimeType};base64,${base64}`,
