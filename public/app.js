@@ -134,8 +134,20 @@ Use spoiler:true para Diagnóstico Final e Plano de Conduta. Responda em portugu
         },
         RADIOLOGY: {
             patterns: [/an[aá]lis.*imagem/i, /raio.?x/i, /radiolog/i, /descrev.*imagem/i, /laudo/i, /xray/i, /tomografia/i, /resson[aâ]ncia/i, /histopatolog/i, /dermatolog/i, /oftalmolog/i, /fundoscop/i, /ct\b/i, /mri\b/i],
-            systemPrompt: 'You are an expert radiologist.',
+            systemPrompt: 'You are an expert radiologist. Analyze the image and provide a structured report.',
             temperature: 0.2, maxTokens: 4096
+        },
+        CHAT: {
+            patterns: [],
+            systemPrompt: `You are MedGemma, a state-of-the-art medical AI. 
+CRITICAL FORMATTING INSTRUCTIONS FOR EXPERT READABILITY:
+1. NEVER output a wall of text.
+2. USE MARKDOWN HEADINGS (###) to separate distinct sections (e.g., ### Avaliação, ### Plano).
+3. USE BULLET POINTS (- or *) profusely to list items or differential diagnoses. Add a blank line before and after lists.
+4. HIGHLIGHT key medical terms, conditions, and concepts in **bold**.
+5. Emphasize important warnings or concepts in *italics* or blockquotes (>).
+Do not output raw compressed text. Always format beautifully and respond in Portuguese (Brazil).`,
+            temperature: 0.3, maxTokens: 4096
         }
     };
 
@@ -146,6 +158,7 @@ Use spoiler:true para Diagnóstico Final e Plano de Conduta. Responda em portugu
 
     function detectIntent(text) {
         for (const [name, intent] of Object.entries(INTENTS)) {
+            if (name === 'CHAT') continue;
             for (const pattern of intent.patterns) {
                 if (pattern.test(text)) return name;
             }
@@ -156,20 +169,73 @@ Use spoiler:true para Diagnóstico Final e Plano de Conduta. Responda em portugu
     // ============================================================
     // API
     // ============================================================
-    async function sendToMedGemma(messages, maxTokens, temperature) {
+    async function sendToMedGemma(messages, maxTokens, temperature, onChunk) {
         const url = getApiUrl('/api/chat');
         const res = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ messages, max_tokens: maxTokens || state.settings.maxTokens, temperature: temperature !== undefined ? temperature : state.settings.temperature })
+            body: JSON.stringify({ messages, max_tokens: maxTokens || state.settings.maxTokens, temperature: temperature !== undefined ? temperature : state.settings.temperature, stream: !!onChunk })
         });
+        
         if (!res.ok) {
             const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
             throw new Error(err.error || err.details || `Falha na requisição: ${res.status}`);
         }
-        const data = await res.json();
-        if (data.choices && data.choices[0]) return data.choices[0].message.content;
-        throw new Error('Formato de resposta inválido');
+
+        if (onChunk) {
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder("utf-8");
+            let fullText = "";
+            let buffer = "";
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                buffer += decoder.decode(value, { stream: true });
+                
+                const lines = buffer.split('\n');
+                buffer = lines.pop(); // Keep incomplete line in buffer
+
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const dataStr = line.slice(6).trim();
+                        if (dataStr === '[DONE]') continue;
+                        if (!dataStr) continue;
+                        try {
+                            const data = JSON.parse(dataStr);
+                            let contentDelta = "";
+                            if (data.choices && data.choices[0].delta && data.choices[0].delta.content) {
+                                contentDelta = data.choices[0].delta.content;
+                            } else if (data.text || data.content) {
+                                contentDelta = data.text || data.content;
+                            }
+                            if (contentDelta) {
+                                fullText += contentDelta;
+                                onChunk(contentDelta, fullText);
+                            }
+                        } catch (e) {
+                            console.warn("Stream parse error on chunk:", dataStr);
+                        }
+                    } else if (line.trim().startsWith('{')) {
+                        // Fallback for non-SSE JSON streams from raw Vertex
+                        try {
+                            const data = JSON.parse(line.trim());
+                            let contentDelta = "";
+                            if (data.choices && data.choices[0].delta && data.choices[0].delta.content) contentDelta = data.choices[0].delta.content;
+                            else if (data.outputs && Array.isArray(data.outputs)) contentDelta = data.outputs[0];
+                            if (contentDelta) { fullText += contentDelta; onChunk(contentDelta, fullText); }
+                        } catch(e) {}
+                    }
+                }
+            }
+            return fullText;
+        } else {
+            const data = await res.json();
+            if (data.choices && data.choices[0]) return data.choices[0].message.content;
+            if (data.outputs && Array.isArray(data.outputs)) return data.outputs[0];
+            if (data.text) return data.text;
+            throw new Error('Formato de resposta inválido');
+        }
     }
 
     // ============================================================
@@ -553,17 +619,42 @@ Use spoiler:true para Diagnóstico Final e Plano de Conduta. Responda em portugu
         try {
             const maxTokens = intentConfig ? intentConfig.maxTokens : state.settings.maxTokens;
             const temperature = intentConfig ? intentConfig.temperature : state.settings.temperature;
-            const response = await sendToMedGemma(messages, maxTokens, temperature);
-            removeTyping(typingId);
-            const structured = tryParseStructured(response);
-            if (structured) renderStructuredMessage(structured);
-            else addAssistantMessage(response);
-            state.chatHistory.push({ role: 'assistant', content: response });
+            
+            const isChat = intent === 'CHAT';
+            let finalResponseText = "";
+
+            if (isChat) {
+                // Real-time Streaming for Chat
+                const msgs = document.getElementById('chat-messages');
+                const streamDiv = document.createElement('div');
+                streamDiv.className = 'message assistant streaming';
+                streamDiv.innerHTML = `<div class="message-avatar">🧬</div><div class="message-content"></div>`;
+                
+                removeTyping(typingId);
+                msgs.appendChild(streamDiv);
+                const contentNode = streamDiv.querySelector('.message-content');
+
+                finalResponseText = await sendToMedGemma(messages, maxTokens, temperature, (delta, fullText) => {
+                    contentNode.innerHTML = formatText(fullText);
+                    scrollToBottom();
+                });
+                
+                streamDiv.classList.remove('streaming');
+            } else {
+                // Structured Data (Quiz, Flashcards) - Wait for full response
+                finalResponseText = await sendToMedGemma(messages, maxTokens, temperature);
+                removeTyping(typingId);
+                const structured = tryParseStructured(finalResponseText);
+                if (structured) renderStructuredMessage(structured);
+                else addAssistantMessage(finalResponseText);
+            }
+
+            state.chatHistory.push({ role: 'assistant', content: finalResponseText });
             await saveConversation(state.currentConvId, state.chatHistory);
             renderHistorySidebar();
         } catch (e) {
             removeTyping(typingId);
-            addAssistantMessage(`⚠️ Erro: ${e.message}\n\nVerifique suas configurações em ⚙️ Configurações.`);
+            addAssistantMessage(`⚠️ Erro: ${e.message}\n\nVerifique suas configurações em ⚙️ Configurações e garanta que sua API e endpoint estão ativos e suportam *chatCompletions*.`);
         }
         sendBtn.disabled = false;
     }
@@ -587,8 +678,21 @@ Use spoiler:true para Diagnóstico Final e Plano de Conduta. Responda em portugu
     // ============================================================
     // Message Rendering
     // ============================================================
-    function scrollToBottom() {
+    // Smart Scrolling Control
+    let isUserScrolledUp = false;
+    document.addEventListener('DOMContentLoaded', () => {
+        const msgsEl = document.getElementById('chat-messages');
+        if (msgsEl) {
+            msgsEl.addEventListener('scroll', function() {
+                isUserScrolledUp = this.scrollHeight - this.scrollTop - this.clientHeight > 50;
+            });
+        }
+    });
+
+    function scrollToBottom(force = false) {
         const el = document.getElementById('chat-messages');
+        if (!el) return;
+        if (!force && isUserScrolledUp) return; // Prevent auto-scroll if user scrolled up to read
         setTimeout(() => el.scrollTop = el.scrollHeight, 50);
     }
 
@@ -610,7 +714,7 @@ Use spoiler:true para Diagnóstico Final e Plano de Conduta. Responda em portugu
         html += '</div>';
         div.innerHTML = html;
         msgs.appendChild(div);
-        scrollToBottom();
+        scrollToBottom(true); // Force scroll for user messages
     }
 
     function addAssistantMessage(text) {
@@ -722,7 +826,7 @@ Use spoiler:true para Diagnóstico Final e Plano de Conduta. Responda em portugu
                 const navDiv = quizEl.querySelector('.iq-nav div:last-child');
                 if (currentIdx < data.questions.length - 1) navDiv.innerHTML += '<button class="iq-nav-btn primary" data-action="next">Próxima →</button>';
                 else navDiv.innerHTML += '<button class="iq-nav-btn primary" data-action="results">Ver Resultado</button>';
-                scrollToBottom();
+                scrollToBottom(true);
             }
             if (navBtn) {
                 const action = navBtn.dataset.action;
@@ -782,31 +886,33 @@ Use spoiler:true para Diagnóstico Final e Plano de Conduta. Responda em portugu
     function initCaseInteraction(container) { container.querySelectorAll('.spoiler').forEach(sp => sp.addEventListener('click', () => sp.classList.toggle('revealed'))); }
 
     // ============================================================
-    // Text Formatting
+    // Text Formatting & Markdown Sanitization
     // ============================================================
     function formatText(text) {
-        // Fix compressed markdown from Vertex AI where newlines or spaces are completely omitted
+        // Aggressively clean Vertex AI's compressed and chaotic markdown
         let cleanedText = text
-            // If a word ends and is immediately followed by a bold tag, force a double newline
+            // Fix triple asterisks glued to words `***Word:` -> `\n\n**Word:** `
+            .replace(/\*\*\*([^*]+):(\s*)\*\*\*/g, '\n\n**$1:** ')
+            .replace(/\*\*\*([^*]+):\*\*\*/g, '\n\n**$1:** ')
+            // Fix double asterisks glued to words without space before them
             .replace(/([.?!;])\s*(\*\*)/g, '$1\n\n$2')
-            // If a list marker * or - has no space after it, add a space (e.g. "*Item" -> "* Item")
-            .replace(/(^|\n)(\*|-)([A-Z0-9])/gi, '$1$2 $3')
-            // If a list marker is glued to the end of a previous sentence, force a newline
-            .replace(/([.?!;])\s*(\*|- )/g, '$1\n\n$2');
+            // Fix double asterisks that have list markers glued to them `**Word:***` -> `**Word:**\n* `
+            .replace(/(\*\*.*?\*\*)\s*\*/g, '$1\n* ')
+            // Ensure space after list markers (* or -) at the start of a line
+            .replace(/(^|\n)(\*|-)(?=[A-Za-z0-9])/g, '$1$2 ')
+            // Remove single dangling asterisks used weirdly as bullets without spaces
+            .replace(/(^|\n)\*([A-Z])/g, '$1* $2')
+            // Fix glued titles/bullets
+            .replace(/([.?!;])\s*(\*|- )/g, '$1\n\n$2')
+            // Clean up multiple newlines into max two
+            .replace(/\n{3,}/g, '\n\n');
 
         if (typeof marked !== 'undefined') {
             return marked.parse(cleanedText, { breaks: true, gfm: true });
         }
         
-        // Fallback if marked is somehow blocked
-        return '<p>' + cleanedText
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\*(.+?)\*/g, '<em>$1</em>')
-            .replace(/`(.+?)`/g, '<code>$1</code>')
-            .replace(/\n\n/g, '</p><p>')
-            .replace(/\n- /g, '</p><ul><li>')
-            .replace(/\n/g, '<br>') + '</p>';
+        // Fallback
+        return '<p>' + cleanedText.replace(/\n/g, '<br>') + '</p>';
     }
 
     function esc(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }

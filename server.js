@@ -112,11 +112,12 @@ app.post('/api/chat', async (req, res) => {
                 "@requestFormat": "chatCompletions",
                 messages: messages,
                 max_tokens: max_tokens || 2048,
-                temperature: temperature || 0.3
+                temperature: temperature || 0.3,
+                stream: stream === true
             }]
         };
 
-        console.log(`[API] calling: ${apiUrl}`);
+        console.log(`[API] calling: ${apiUrl} (stream: ${stream})`);
 
         const response = await fetch(apiUrl, {
             method: 'POST',
@@ -137,6 +138,27 @@ app.post('/api/chat', async (req, res) => {
                 error: `Vertex AI returned ${response.status}`,
                 details: errText
             });
+        }
+
+        if (stream) {
+            res.setHeader('Content-Type', 'text/event-stream');
+            res.setHeader('Cache-Control', 'no-cache');
+            res.setHeader('Connection', 'keep-alive');
+            
+            // Web Streams API decoding for Node.js native fetch payload
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder('utf-8');
+            try {
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    res.write(decoder.decode(value, { stream: true }));
+                }
+            } catch (streamErr) {
+                console.error('[API] Stream read error:', streamErr);
+            }
+            res.end();
+            return;
         }
 
         const data = await response.json();
