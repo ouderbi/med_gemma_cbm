@@ -185,8 +185,12 @@ app.post('/api/chat', async (req, res) => {
         }
 
     } catch (err) {
-        console.error('Chat error:', err.message);
-        res.status(500).json({ error: err.message });
+        console.error('==================== CHAT ERROR ====================');
+        console.error('Error message:', err.message);
+        console.error('Error stack:', err.stack);
+        if (err.cause) console.error('Error cause:', err.cause);
+        console.error('====================================================');
+        res.status(500).json({ error: err.message, details: err.stack });
     }
 });
 
