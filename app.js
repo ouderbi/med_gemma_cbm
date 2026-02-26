@@ -785,12 +785,21 @@ Use spoiler:true para Diagnóstico Final e Plano de Conduta. Responda em portugu
     // Text Formatting
     // ============================================================
     function formatText(text) {
+        // Fix compressed markdown from Vertex AI where newlines or spaces are completely omitted
+        let cleanedText = text
+            // If a word ends and is immediately followed by a bold tag, force a double newline
+            .replace(/([.?!;])\s*(\*\*)/g, '$1\n\n$2')
+            // If a list marker * or - has no space after it, add a space (e.g. "*Item" -> "* Item")
+            .replace(/(^|\n)(\*|-)([A-Z0-9])/gi, '$1$2 $3')
+            // If a list marker is glued to the end of a previous sentence, force a newline
+            .replace(/([.?!;])\s*(\*|- )/g, '$1\n\n$2');
+
         if (typeof marked !== 'undefined') {
-            // Force line breaks to <br> to mimic native chat UI behavior
-            return marked.parse(text, { breaks: true, gfm: true });
+            return marked.parse(cleanedText, { breaks: true, gfm: true });
         }
+        
         // Fallback if marked is somehow blocked
-        return '<p>' + text
+        return '<p>' + cleanedText
             .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
             .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
             .replace(/\*(.+?)\*/g, '<em>$1</em>')
