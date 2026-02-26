@@ -65,6 +65,10 @@
         </div>
 
         <ul class="nav-list nav-bottom">
+            <li class="nav-item" data-section="about">
+                <span class="nav-icon">💡</span>
+                <span class="nav-label">Sobre o MedGemma</span>
+            </li>
             <li class="nav-item" data-section="settings">
                 <span class="nav-icon">⚙️</span>
                 <span class="nav-label">Configurações</span>
@@ -159,6 +163,41 @@
             </div>
             <div id="history-list" class="history-list">
                 <p class="empty-state">📭 Nenhuma conversa salva ainda. Suas conversas aparecerão aqui automaticamente.</p>
+            </div>
+        </section>
+
+        <!-- ABOUT MEDGEMMA -->
+        <section id="section-about" class="section">
+            <div class="section-header">
+                <h1>💡 Sobre o MedGemma</h1>
+                <p class="section-desc">Entenda o que torna o MedGemma único para a área da saúde</p>
+            </div>
+            <div class="settings-grid">
+                <div class="settings-card full">
+                    <h3>O que é o MedGemma?</h3>
+                    <p style="margin-bottom: 15px; line-height: 1.6; color: var(--text-secondary);">
+                        O <strong>MedGemma</strong> é uma versão especializada da família de modelos abertos <em>Gemma</em> desenvolvida pelo Google DeepMind. Enquanto a maioria das IAs são criadas de forma generalista, o MedGemma é otimizado primariamente para <strong>raciocínio clínico, compreensão médica estruturada e precisão diagnóstica</strong>.
+                    </p>
+                    <p style="line-height: 1.6; color: var(--text-secondary);">
+                        Este aplicativo fornece uma interface unificada e privada, processando tudo diretamente no seu servidor configurado e sendo projetada especificamente para testar as habilidades e o potencial do <strong>MedGemma 27B Multimodal</strong> (treinado não apenas em textos, mas no processamento de imagens radiológicas e dermatológicas avançadas).
+                    </p>
+                </div>
+                <div class="settings-card">
+                    <h3>♊ Gemini Comum (Generalista)</h3>
+                    <ul style="color: var(--text-secondary); line-height: 1.6; padding-left: 20px;">
+                        <li><strong>Treinamento Amplo:</strong> Treinado em um vasto corpus de dados da internet (notícias, cultura geral, código, criatividade).</li>
+                        <li><strong>Foco:</strong> Excelente para tarefas do dia a dia, assistentes virtuais de busca web e tradução.</li>
+                        <li><strong>Na Medicina:</strong> Pode fornecer orientações genéricas, porém carece de calibração fina (fine-tuning) específica para fluxos reais de raciocínio clínico ou jargão em português da saúde sem risco aumentado de alucinação.</li>
+                    </ul>
+                </div>
+                <div class="settings-card" style="border: 1px solid var(--accent); background: rgba(5, 230, 169, 0.03);">
+                    <h3 style="color: var(--accent);">🧬 MedGemma (Especialista)</h3>
+                    <ul style="color: var(--text-secondary); line-height: 1.6; padding-left: 20px;">
+                        <li><strong>Fine-Tuning Médico:</strong> Ajustado extensivamente em bases de dados médicas rigorosas, literatura científica como o PubMed e benchmarks profissionais (ex: MedQA).</li>
+                        <li><strong>Lógica de Conduta:</strong> Otimizado para seguir passo-a-passo no raciocínio diagnóstico e levantar hipóteses diferenciais com segurança.</li>
+                        <li><strong>Precisão Terminológica:</strong> Compreende com excelência o vocabulário médico (semiologia e farmacologia) sem desviar para respostas generalistas, mantendo um perfil "Expert".</li>
+                    </ul>
+                </div>
             </div>
         </section>
 
