@@ -44,11 +44,12 @@ body {
     font-family: var(--font-main);
     background: var(--bg-primary);
     color: var(--text-primary);
-    min-height: 100vh;
+    height: 100vh;
     display: flex;
     overflow: hidden; /* Prevents whole-page scrolling, letting inner containers scroll */
     -webkit-font-smoothing: antialiased;
     position: relative;
+    z-index: 1;
 }
 
 /* Ambient Background Blobs (The "Living UI" effect) */
@@ -87,20 +88,24 @@ code { font-family: var(--font-mono); background: var(--bg-input); padding: 3px 
 .sidebar {
     position: relative;
     width: var(--sidebar-width);
+    flex-shrink: 0;
     background: var(--bg-sidebar);
     border: 1px solid var(--border-subtle);
     display: flex;
     flex-direction: column;
     z-index: 100;
     margin: 16px 0 16px 16px;
+    height: calc(100vh - 32px);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     transition: transform var(--transition);
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
-.sidebar-header { padding: 24px 20px; border-bottom: 1px solid var(--border-subtle); }
+.sidebar-header { padding: 24px 20px; border-bottom: 1px solid var(--border-subtle); flex-shrink: 0; }
 
 .logo { display: flex; align-items: center; gap: 14px; }
 .logo-icon { font-size: 2.2rem; filter: drop-shadow(0 0 15px var(--accent-glow)); animation: pulse-logo 3s ease-in-out infinite alternate; }
@@ -141,11 +146,19 @@ code { font-family: var(--font-mono); background: var(--bg-input); padding: 3px 
 /* Quick Actions */
 .quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
-/* Exam Tags */
 .exam-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .exam-tag { font-size: 0.7rem; font-weight: 600; padding: 4px 10px; background: rgba(0, 224, 184, 0.08); border: 1px solid rgba(0, 224, 184, 0.2); border-radius: var(--radius-pill); color: var(--accent); }
 
-.sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border-subtle); margin-top: auto; }
+.sidebar-footer { 
+    padding: 16px 20px; 
+    border-top: 1px solid var(--border-subtle); 
+    position: sticky;
+    bottom: 0;
+    background: var(--bg-sidebar);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    z-index: 10;
+}
 .connection-badge { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; font-weight: 600; }
 .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--danger); box-shadow: 0 0 10px var(--danger); transition: all var(--transition); }
 .connection-badge.connected .status-dot { background: var(--success); box-shadow: 0 0 12px var(--success); }
@@ -162,8 +175,8 @@ code { font-family: var(--font-mono); background: var(--bg-input); padding: 3px 
 /* ============================================================
    MAIN CONTENT
    ============================================================ */
-.main-content { margin-left: var(--sidebar-width); flex: 1; min-height: 100vh; position: relative; z-index: 1; }
-.section { display: none; height: 100vh; }
+.main-content { margin-left: 0; flex: 1; height: 100vh; position: relative; z-index: 1; display: flex; flex-direction: column; }
+.section { display: none; flex: 1; height: 100%; overflow-y: auto; }
 .section.active { display: flex; flex-direction: column; }
 
 .section-header { padding: 24px 32px; }
@@ -392,11 +405,20 @@ code { font-family: var(--font-mono); background: var(--bg-input); padding: 3px 
    RESPONSIVE — Mobile-First Enhancement
    ============================================================ */
 @media (max-width: 768px) {
-    .sidebar { transform: translateX(-100%); width: 280px; }
+    .sidebar { 
+        position: fixed; 
+        top: 0; left: 0; bottom: 0;
+        margin: 0; 
+        height: 100vh;
+        border-radius: 0;
+        transform: translateX(-100%); 
+        width: 280px; 
+        z-index: 1000;
+    }
     .sidebar.open { transform: translateX(0); box-shadow: 4px 0 30px rgba(0,0,0,0.5); }
     .mobile-header { display: flex; }
     .main-content { margin-left: 0; }
-    .section { padding-top: 60px; }
+    .section { padding-top: 64px; }
     .chat-messages { padding: 12px 12px 8px; }
     .chat-input-area { padding: 8px 12px 16px; padding-bottom: calc(16px + env(safe-area-inset-bottom)); gap: 6px; }
     .image-preview-bar { padding: 6px 12px; }
