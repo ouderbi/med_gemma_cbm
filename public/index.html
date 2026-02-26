@@ -12,6 +12,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
     <!-- Sidebar -->
@@ -169,33 +170,60 @@
         <!-- ABOUT MEDGEMMA -->
         <section id="section-about" class="section">
             <div class="section-header">
-                <h1>💡 Sobre o MedGemma</h1>
-                <p class="section-desc">Entenda o que torna o MedGemma único para a área da saúde</p>
+                <h1 style="display: flex; align-items: center; gap: 12px;"><span style="filter: drop-shadow(0 0 10px var(--accent-glow));">💡</span> Sobre a Plataforma</h1>
+                <p class="section-desc">Entenda a tecnologia por trás desta interface e o que torna o MedGemma único em saúde</p>
             </div>
-            <div class="settings-grid">
+            
+            <div class="settings-grid" style="align-content: start; overflow-y: auto; padding-right: 15px; padding-bottom: 30px;">
+                
+                <!-- CREDITS CARD (FEATURED) -->
+                <div class="settings-card full" style="border: 1px solid var(--accent); background: linear-gradient(135deg, rgba(0, 212, 170, 0.05), rgba(14, 165, 233, 0.05)); position: relative; overflow: hidden;">
+                    <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: var(--accent-gradient); opacity: 0.1; filter: blur(40px); border-radius: 50%;"></div>
+                    <h3 style="color: var(--accent); font-size: 1.15rem; margin-bottom: 12px; display: flex; align-items: center; gap: 10px;">
+                        <span>👨‍💻</span> Desenvolvimento da Interface
+                    </h3>
+                    <p style="margin-bottom: 12px; line-height: 1.6; color: var(--text-primary); font-size: 0.95rem;">
+                        Toda esta plataforma web responsiva, o design "Dark Premium" (Material Glassmorphism), a integração de leitura de imagens locais, o processamento de áudio (se aplicado) e a arquitetura segura de chat conectada ao SDK do Vertex AI, <strong>foram construídos e idealizados por Ouderbi</strong>.
+                    </p>
+                    <p style="line-height: 1.6; color: var(--text-secondary); font-size: 0.9rem;">
+                        O objetivo da criação desta interface foi democratizar o acesso ao poderoso modelo MedGemma hospedado no Google Cloud (GCP). Todo o tráfego ocorre localmente (na nuvem pessoal do usuário), para garantir privacidade total dos dados médicos, demonstrando habilidades avançadas em <em>Front-end Engineering</em>, <em>Prompt Design</em> e Integrações de Nuvem.
+                    </p>
+                </div>
+
+                <!-- MEDGEMMA EXPLANATION -->
                 <div class="settings-card full">
-                    <h3>O que é o MedGemma?</h3>
+                    <h3 style="margin-bottom: 12px; display: flex; align-items: center; gap: 10px;"><span>🧬</span> O que é o MedGemma?</h3>
                     <p style="margin-bottom: 15px; line-height: 1.6; color: var(--text-secondary);">
-                        O <strong>MedGemma</strong> é uma versão especializada da família de modelos abertos <em>Gemma</em> desenvolvida pelo Google DeepMind. Enquanto a maioria das IAs são criadas de forma generalista, o MedGemma é otimizado primariamente para <strong>raciocínio clínico, compreensão médica estruturada e precisão diagnóstica</strong>.
+                        O <strong>MedGemma</strong> é uma versão altamente especializada da família de modelos de código aberto <em>Gemma</em> (desenvolvida pela equipe do Google DeepMind).
                     </p>
                     <p style="line-height: 1.6; color: var(--text-secondary);">
-                        Este aplicativo fornece uma interface unificada e privada, processando tudo diretamente no seu servidor configurado e sendo projetada especificamente para testar as habilidades e o potencial do <strong>MedGemma 27B Multimodal</strong> (treinado não apenas em textos, mas no processamento de imagens radiológicas e dermatológicas avançadas).
+                        Enquanto a vasta maioria das IAs são criadas de forma generalista (ex: ChatGPT, Gemini Comum), o MedGemma passou por um rigoroso treinamento primário focado estritamente em <strong>raciocínio clínico, compreensão estruturada de anatomia e precisão diagnóstica</strong> de nível especialista. Ele também suporta a multimodalidade profunda, processando exames de imagem radiológica, dermatológica, etc., com calibrações únicas.
                     </p>
                 </div>
+
+                <!-- COMPARISON: GEMINI -->
                 <div class="settings-card">
-                    <h3>♊ Gemini Comum (Generalista)</h3>
-                    <ul style="color: var(--text-secondary); line-height: 1.6; padding-left: 20px;">
-                        <li><strong>Treinamento Amplo:</strong> Treinado em um vasto corpus de dados da internet (notícias, cultura geral, código, criatividade).</li>
-                        <li><strong>Foco:</strong> Excelente para tarefas do dia a dia, assistentes virtuais de busca web e tradução.</li>
-                        <li><strong>Na Medicina:</strong> Pode fornecer orientações genéricas, porém carece de calibração fina (fine-tuning) específica para fluxos reais de raciocínio clínico ou jargão em português da saúde sem risco aumentado de alucinação.</li>
+                    <h3 style="color: var(--text-primary); margin-bottom: 14px;">♊ O Gemini Comum</h3>
+                    <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px; font-size: 0.9rem;">
+                        É um modelo <strong>Generalista</strong> projetado para servir um usuário comum em dezenas de cenários do dia a dia.
+                    </p>
+                    <ul style="color: var(--text-secondary); line-height: 1.6; padding-left: 20px; font-size: 0.9rem;">
+                        <li style="margin-bottom: 8px;"><strong>Treinamento Amplo:</strong> Treinado em um vasto corpus de dados de internet aberta, jornais, Wikipedia, códigos de programação e até culinária.</li>
+                        <li style="margin-bottom: 8px;"><strong>Foco:</strong> Chat criativo, resumo de PDFs genéricos, tradução e assistente virtual geral.</li>
+                        <li><strong>Déficit Médico:</strong> Na medicina avançada, ele tende a dar conselhos genéricos ou alucinar (inventar) condutas, pois seu conhecimento do jargão e do <em>Clinical Pathway</em> (protocolo clínico) é diluído.</li>
                     </ul>
                 </div>
-                <div class="settings-card" style="border: 1px solid var(--accent); background: rgba(5, 230, 169, 0.03);">
-                    <h3 style="color: var(--accent);">🧬 MedGemma (Especialista)</h3>
-                    <ul style="color: var(--text-secondary); line-height: 1.6; padding-left: 20px;">
-                        <li><strong>Fine-Tuning Médico:</strong> Ajustado extensivamente em bases de dados médicas rigorosas, literatura científica como o PubMed e benchmarks profissionais (ex: MedQA).</li>
-                        <li><strong>Lógica de Conduta:</strong> Otimizado para seguir passo-a-passo no raciocínio diagnóstico e levantar hipóteses diferenciais com segurança.</li>
-                        <li><strong>Precisão Terminológica:</strong> Compreende com excelência o vocabulário médico (semiologia e farmacologia) sem desviar para respostas generalistas, mantendo um perfil "Expert".</li>
+
+                <!-- COMPARISON: MEDGEMMA -->
+                <div class="settings-card" style="border: 1px solid rgba(0, 212, 170, 0.4); background: rgba(0, 212, 170, 0.02); box-shadow: inset 0 0 20px rgba(0, 212, 170, 0.05);">
+                    <h3 style="color: var(--accent); margin-bottom: 14px;">🧬 O MedGemma 27B</h3>
+                    <p style="color: var(--text-primary); line-height: 1.6; margin-bottom: 12px; font-size: 0.9rem;">
+                        É um modelo <strong>Especialista Clínico</strong> projetado por e para instituições de saúde.
+                    </p>
+                    <ul style="color: var(--text-secondary); line-height: 1.6; padding-left: 20px; font-size: 0.9rem;">
+                        <li style="margin-bottom: 8px;"><strong>Dados Curados:</strong> Ajustado quase que inteiramente em conhecimento médico curado por humanos (revistas científicas do PubMed e benchmarks internacionais hiper-rígidos como o MedQA).</li>
+                        <li style="margin-bottom: 8px;"><strong>Raciocínio Diagnóstico:</strong> Ele segue um padrão lógico de conduta clínica, avaliando hipóteses e diagnósticos diferenciais ao invés de pular para conclusões baseadas em web-search.</li>
+                        <li><strong>Precisão Terminológica:</strong> Não dilui jargões. Conhece semiologia, interações medicamentosas avançadas e "fala" como um radiologista ou clínico sênior.</li>
                     </ul>
                 </div>
             </div>
