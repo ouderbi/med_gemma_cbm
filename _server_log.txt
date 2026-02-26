@@ -1,0 +1,8 @@
+
+  🧬 MedGemma CBM Server running at http://localhost:3000
+
+  Endpoint configured: true
+  Project: 927344461840
+
+[API] calling: https://mg-endpoint-a0838ce4-a75a-414e-ba8c-728179e23c68.us-central1-927344461840.prediction.vertexai.goog/v1/projects/927344461840/locations/us-central1/endpoints/mg-endpoint-a0838ce4-a75a-414e-ba8c-728179e23c68:predict
+[API] Unexpected response format: {"deployedModelId":"7533731077974654976","model":"projects/927344461840/locations/us-central1/models/google_medgemma-27b-it-1772101063805","modelDisplayName":"google_medgemma-27b-it-1772101063805","modelVersionId":"1","predictions":{"choices":[{"finish_reason":"stop","index":0,"logprobs":null,"message":{"annotations":null,"audio":null,"content":"Olá! Sou o MedGemma, seu assistente de IA médica treinado pelo Google. Estou aqui para fornecer informações médicas detalhadas e baseadas em evidências 
