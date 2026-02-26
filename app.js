@@ -652,10 +652,16 @@ Use spoiler:true para Diagnóstico Final e Plano de Conduta. Responda em portugu
         }
 
         div.innerHTML = `
-            <div class="message-avatar">🧬</div>
-            <div class="message-content">
-                ${statusText ? `<div class="processing-status">${statusText}</div>` : ''}
-                <div class="typing-dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+            <div class="message-avatar" style="animation: pulse-glow 2s infinite;">🧬</div>
+            <div class="message-content" style="min-width: 250px;">
+                ${statusText ? `<div class="processing-status">
+                    <span class="processing-text">${statusText}</span>
+                </div>` : ''}
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+                    <div class="skeleton-line long"></div>
+                    <div class="skeleton-line"></div>
+                    <div class="skeleton-line short"></div>
+                </div>
             </div>`;
         msgs.appendChild(div);
         scrollToBottom();
@@ -780,7 +786,8 @@ Use spoiler:true para Diagnóstico Final e Plano de Conduta. Responda em portugu
     // ============================================================
     function formatText(text) {
         if (typeof marked !== 'undefined') {
-            return marked.parse(text);
+            // Force line breaks to <br> to mimic native chat UI behavior
+            return marked.parse(text, { breaks: true, gfm: true });
         }
         // Fallback if marked is somehow blocked
         return '<p>' + text
