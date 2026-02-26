@@ -76,6 +76,20 @@
                     <span class="nav-label">Configurações</span>
                 </li>
             </ul>
+
+            <div class="sidebar-section">
+                <span class="sidebar-section-title">🎨 Tema</span>
+                <div class="theme-picker" id="theme-picker">
+                    <button class="theme-dot active" data-theme="gemini-dark" title="Escuro Gemini" style="background:#131314;border-color:#8ab4f8;"></button>
+                    <button class="theme-dot" data-theme="ocean" title="Oceano" style="background:#0d1b2a;border-color:#48cae4;"></button>
+                    <button class="theme-dot" data-theme="emerald" title="Esmeralda" style="background:#0a1a0f;border-color:#34d399;"></button>
+                    <button class="theme-dot" data-theme="rose" title="Rosé" style="background:#1a0a14;border-color:#f472b6;"></button>
+                    <button class="theme-dot" data-theme="amber" title="Âmbar" style="background:#1a1408;border-color:#fbbf24;"></button>
+                    <button class="theme-dot" data-theme="lavender" title="Lavanda" style="background:#140f1a;border-color:#a78bfa;"></button>
+                    <button class="theme-dot" data-theme="sunset" title="Pôr do Sol" style="background:#1a0f08;border-color:#fb923c;"></button>
+                    <button class="theme-dot" data-theme="light" title="Claro" style="background:#f8f9fa;border-color:#1a73e8;"></button>
+                </div>
+            </div>
         </div>
 
         <div class="sidebar-footer">
@@ -142,9 +156,13 @@
                     <button id="chat-clear-imgs" class="remove-img-btn" title="Remover todas">✕</button>
                 </div>
                 <div class="chat-input-area">
-                    <label class="attach-btn" title="Anexar imagens médicas (até 30MB cada)">
+                    <label class="attach-btn" title="Anexar imagens médicas ou PDFs (até 30MB)">
                         📎
-                        <input type="file" id="chat-file-input" accept=".jpg,.jpeg,.png,.webp,.gif,.bmp,.tiff" multiple hidden>
+                        <input type="file" id="chat-file-input" accept=".jpg,.jpeg,.png,.webp,.gif,.bmp,.tiff,.tif,.pdf" multiple hidden>
+                    </label>
+                    <label class="attach-btn camera-btn" title="Capturar foto com a câmera">
+                        📷
+                        <input type="file" id="chat-camera-input" accept="image/*" capture="environment" hidden>
                     </label>
                     <textarea id="chat-input" placeholder="Pergunte algo, peça um quiz, envie uma imagem..." rows="1"></textarea>
                     <button id="chat-send-btn" class="send-btn" title="Enviar">
