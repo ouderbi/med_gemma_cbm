@@ -30,7 +30,7 @@
         db: null,
         currentConvId: null,
         settings: {
-            apiBaseUrl: '', // New field for GitHub Pages support
+            apiBaseUrl: 'https://petite-monkeys-wear.loca.lt', // Auto-configured for this session
             endpointUrl: '',
             apiKey: '',
             temperature: 0.3,
