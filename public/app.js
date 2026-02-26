@@ -15,8 +15,8 @@
     // ============================================================
     const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
     const MAX_IMAGES = 5; // Máximo de imagens por mensagem
-    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/bmp', 'image/tiff'];
-    const ALLOWED_EXTS = '.jpg, .jpeg, .png, .webp, .gif, .bmp, .tiff';
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/bmp', 'image/tiff', 'application/pdf'];
+    const ALLOWED_EXTS = '.jpg, .jpeg, .png, .webp, .gif, .bmp, .tiff, .pdf';
     const DB_NAME = 'MedGemmaCBM';
     const DB_VERSION = 1;
 
@@ -404,6 +404,23 @@ Do not output raw compressed text. Always format beautifully and respond in Port
         // New conversation
         const newBtn = document.getElementById('new-chat-btn');
         if (newBtn) newBtn.addEventListener('click', startNewConversation);
+
+        // Camera input (mobile)
+        const cameraInput = document.getElementById('chat-camera-input');
+        if (cameraInput) {
+            cameraInput.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                if (state.pendingImages.length >= MAX_IMAGES) {
+                    addSystemMessage(`⚠️ Máximo de ${MAX_IMAGES} arquivos por mensagem.`);
+                    return;
+                }
+                const v = validateFile(file);
+                if (v.valid) await attachImage(file);
+                else addSystemMessage('⚠️ ' + v.error);
+                e.target.value = '';
+            });
+        }
     }
 
     function handleQuickCommand(command) {
@@ -933,12 +950,42 @@ Do not output raw compressed text. Always format beautifully and respond in Port
     function showStatus(id, msg, type) { const el = document.getElementById(id); el.textContent = msg; el.className = `set-status show ${type}`; setTimeout(() => el.className = 'set-status', 8000); }
 
     // ============================================================
+    // TEMAS — Sistema de Cores
+    // ============================================================
+    function initTheme() {
+        const saved = localStorage.getItem('medgemma-theme') || 'gemini-dark';
+        applyTheme(saved);
+
+        document.getElementById('theme-picker')?.addEventListener('click', (e) => {
+            const dot = e.target.closest('.theme-dot');
+            if (!dot) return;
+            const theme = dot.dataset.theme;
+            applyTheme(theme);
+            localStorage.setItem('medgemma-theme', theme);
+        });
+    }
+
+    function applyTheme(theme) {
+        // Remove data-theme to use :root defaults for gemini-dark
+        if (theme === 'gemini-dark') {
+            document.documentElement.removeAttribute('data-theme');
+        } else {
+            document.documentElement.setAttribute('data-theme', theme);
+        }
+        // Update active dot
+        document.querySelectorAll('.theme-dot').forEach(d => {
+            d.classList.toggle('active', d.dataset.theme === theme);
+        });
+    }
+
+    // ============================================================
     // INIT
     // ============================================================
     async function init() {
         try { state.db = await openDB(); } catch (e) { console.warn('IndexedDB não disponível:', e); }
         state.currentConvId = 'conv-' + Date.now();
         loadSettings();
+        initTheme();
         initNavigation();
         initChat();
         initSettings();

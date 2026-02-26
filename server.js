@@ -14,10 +14,15 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Multer for image upload — 30MB limit, medical image types
-// MedGemma normaliza para 896x896px internamente, mas imagens
-// médicas (raio-X, CT) podem ter até 30MB em alta resolução.
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/bmp', 'image/tiff'];
+// Multer for file upload — Images + PDFs
+// MedGemma 27B Multimodal: images (896x896px internal resize)
+// Vertex AI chatCompletions: supports PDF inline base64 up to 20MB
+// Images: JPEG, PNG, WebP, GIF, BMP, TIFF (up to 30MB each)
+// Documents: PDF (up to 20MB, Vertex AI inline limit)
+const ALLOWED_TYPES = [
+    'image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/bmp', 'image/tiff',
+    'application/pdf'
+];
 const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
 
 const upload = multer({
@@ -27,7 +32,7 @@ const upload = multer({
         if (ALLOWED_TYPES.includes(file.mimetype)) {
             cb(null, true);
         } else {
-            cb(new Error(`Tipo de arquivo não suportado: ${file.mimetype}. Use: JPG, PNG, WebP, GIF, BMP ou TIFF.`), false);
+            cb(new Error(`Tipo de arquivo não suportado: ${file.mimetype}. Use: JPG, PNG, WebP, GIF, BMP, TIFF ou PDF.`), false);
         }
     }
 });

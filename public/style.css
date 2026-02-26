@@ -545,3 +545,99 @@ code { font-family: var(--font-mono); background: var(--bg-surface); padding: 2p
 @media (max-width: 768px) {
     .sidebar.open::after { content: ''; position: fixed; top: 0; left: 280px; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: -1; }
 }
+
+/* ============================================================
+   THEME PICKER
+   ============================================================ */
+.theme-picker {
+    display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 0;
+}
+.theme-dot {
+    width: 28px; height: 28px; border-radius: 50%; border: 2px solid transparent;
+    cursor: pointer; transition: all var(--transition); position: relative;
+    outline: none;
+}
+.theme-dot:hover { transform: scale(1.15); }
+.theme-dot.active { border-width: 3px; box-shadow: 0 0 8px rgba(255,255,255,0.15); }
+.theme-dot.active::after {
+    content: '✓'; position: absolute; inset: 0; display: flex; align-items: center;
+    justify-content: center; font-size: 0.65rem; font-weight: 700; color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+}
+
+/* Camera button: hidden on desktop, visible on mobile */
+.camera-btn { display: none; }
+@media (max-width: 768px) {
+    .camera-btn { display: flex; }
+}
+
+/* ============================================================
+   COLOR THEMES
+   ============================================================ */
+
+/* Ocean */
+[data-theme="ocean"] {
+    --bg-primary: #0d1b2a; --bg-secondary: #1b2838; --bg-surface: #243447;
+    --bg-hover: #2d3f52; --bg-sidebar: #152232; --bg-input: #243447;
+    --accent: #48cae4; --accent-hover: #90e0ef;
+    --accent-surface: rgba(72, 202, 228, 0.08); --accent-surface-hover: rgba(72, 202, 228, 0.14);
+    --border-active: rgba(72, 202, 228, 0.4);
+}
+
+/* Emerald */
+[data-theme="emerald"] {
+    --bg-primary: #0a1a0f; --bg-secondary: #142a1a; --bg-surface: #1e3a24;
+    --bg-hover: #284a2e; --bg-sidebar: #112118; --bg-input: #1e3a24;
+    --accent: #34d399; --accent-hover: #6ee7b7;
+    --accent-surface: rgba(52, 211, 153, 0.08); --accent-surface-hover: rgba(52, 211, 153, 0.14);
+    --border-active: rgba(52, 211, 153, 0.4);
+}
+
+/* Rosé */
+[data-theme="rose"] {
+    --bg-primary: #1a0a14; --bg-secondary: #2a141e; --bg-surface: #3a1e28;
+    --bg-hover: #4a2832; --bg-sidebar: #221018; --bg-input: #3a1e28;
+    --accent: #f472b6; --accent-hover: #f9a8d4;
+    --accent-surface: rgba(244, 114, 182, 0.08); --accent-surface-hover: rgba(244, 114, 182, 0.14);
+    --border-active: rgba(244, 114, 182, 0.4);
+}
+
+/* Amber */
+[data-theme="amber"] {
+    --bg-primary: #1a1408; --bg-secondary: #2a2210; --bg-surface: #3a3018;
+    --bg-hover: #4a3e20; --bg-sidebar: #221a0c; --bg-input: #3a3018;
+    --accent: #fbbf24; --accent-hover: #fcd34d;
+    --accent-surface: rgba(251, 191, 36, 0.08); --accent-surface-hover: rgba(251, 191, 36, 0.14);
+    --border-active: rgba(251, 191, 36, 0.4);
+    --warning: #fb923c;
+}
+
+/* Lavender */
+[data-theme="lavender"] {
+    --bg-primary: #140f1a; --bg-secondary: #1e182a; --bg-surface: #28213a;
+    --bg-hover: #322a4a; --bg-sidebar: #1a1422; --bg-input: #28213a;
+    --accent: #a78bfa; --accent-hover: #c4b5fd;
+    --accent-surface: rgba(167, 139, 250, 0.08); --accent-surface-hover: rgba(167, 139, 250, 0.14);
+    --border-active: rgba(167, 139, 250, 0.4);
+}
+
+/* Sunset */
+[data-theme="sunset"] {
+    --bg-primary: #1a0f08; --bg-secondary: #2a1a10; --bg-surface: #3a2518;
+    --bg-hover: #4a3020; --bg-sidebar: #22140c; --bg-input: #3a2518;
+    --accent: #fb923c; --accent-hover: #fdba74;
+    --accent-surface: rgba(251, 146, 60, 0.08); --accent-surface-hover: rgba(251, 146, 60, 0.14);
+    --border-active: rgba(251, 146, 60, 0.4);
+}
+
+/* Light Theme */
+[data-theme="light"] {
+    --bg-primary: #ffffff; --bg-secondary: #f1f3f4; --bg-surface: #e8eaed;
+    --bg-hover: #dde0e3; --bg-sidebar: #f8f9fa; --bg-input: #f1f3f4;
+    --border-subtle: rgba(0, 0, 0, 0.1);
+    --accent: #1a73e8; --accent-hover: #1967d2;
+    --accent-surface: rgba(26, 115, 232, 0.08); --accent-surface-hover: rgba(26, 115, 232, 0.14);
+    --border-active: rgba(26, 115, 232, 0.4);
+    --text-primary: #202124; --text-secondary: #5f6368; --text-muted: #9aa0a6;
+    --danger: #d93025; --success: #1e8e3e; --warning: #f9ab00;
+}
