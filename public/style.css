@@ -484,11 +484,28 @@ code { font-family: var(--font-mono); background: var(--bg-input); padding: 2px 
 .msg-images img.attached-img { width: 100%; max-width: none; height: 140px; object-fit: cover; margin: 0; }
 
 /* ============================================================
-   PROCESSING STATUS (contextual typing indicator)
+   PROCESSING STATUS (Skeleton & Shimmer)
    ============================================================ */
 .processing-status {
+    display: flex; gap: 8px; align-items: center; margin-bottom: 12px;
+}
+.skeleton-line {
+    height: 12px; border-radius: 6px;
+    background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-card-hover) 50%, var(--bg-card) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
+}
+.skeleton-line.short { width: 40px; }
+.skeleton-line.long { width: 120px; }
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.processing-text {
     font-size: 0.82rem; font-weight: 600; color: var(--accent);
-    margin-bottom: 6px; animation: processingPulse 2s ease-in-out infinite;
+    animation: processingPulse 2s ease-in-out infinite;
 }
 @keyframes processingPulse {
     0%, 100% { opacity: 1; }
