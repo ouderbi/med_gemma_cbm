@@ -310,7 +310,10 @@ a:hover { color: var(--text-primary); }
     background: var(--island-bg); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass);
     border: 1px solid var(--card-border); padding: 18px 24px; border-radius: 24px 24px 4px 24px; box-shadow: var(--shadow-soft);
 }
-.message.assistant .message-content { padding-top: 6px; }
+.message.assistant .message-content { 
+    background: var(--card-bg); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass);
+    border: 1px solid var(--card-border); padding: 18px 24px; border-radius: 24px 24px 24px 4px; box-shadow: var(--shadow-soft);
+}
 
 .message-content img.attached-img { max-width: 100%; max-height: 350px; border-radius: var(--radius-md); margin: 16px 0; border: 1px solid var(--card-border-hover); object-fit: contain; background: var(--card-bg); }
 
@@ -474,12 +477,15 @@ a:hover { color: var(--text-primary); }
 }
 .menu-btn { background: none; border: none; color: var(--text-primary); cursor: pointer; display: flex; }
 .mobile-logo-text { font-weight: 700; font-size: 1.1rem; letter-spacing: -0.02em; }
+.mobile-close-sidebar { display: none; }
 
 @media (max-width: 900px) {
     .mobile-header { display: flex; }
     .nav-island { position: fixed; transform: translateX(-100%); width: 320px; height: 100vh; border-radius: 0; border: none; border-right: 1px solid var(--card-border); z-index: 70; }
     .nav-island.open { transform: translateX(0); }
     .nav-island.open::after { content: ''; position: fixed; top: 0; left: 320px; right: -100vw; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); z-index: -1; }
+    
+    .mobile-close-sidebar { display: flex; align-items: center; justify-content: center; position: absolute; top: 20px; right: 20px; width: 40px; height: 40px; border-radius: 50%; background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-primary); z-index: 80; font-size: 1.2rem; cursor: pointer; }
     
     .workspace { border-radius: 0; }
     .section { padding-top: 64px; }

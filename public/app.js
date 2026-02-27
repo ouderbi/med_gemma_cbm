@@ -187,11 +187,14 @@ Do not output raw compressed text. Always format beautifully and respond in Port
             const decoder = new TextDecoder("utf-8");
             let fullText = "";
             let buffer = "";
+            let rawBuffer = "";
 
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
-                buffer += decoder.decode(value, { stream: true });
+                const chunkStr = decoder.decode(value, { stream: true });
+                buffer += chunkStr;
+                rawBuffer += chunkStr;
                 
                 const lines = buffer.split('\n');
                 buffer = lines.pop(); // Keep incomplete line in buffer
@@ -216,17 +219,24 @@ Do not output raw compressed text. Always format beautifully and respond in Port
                         } catch (e) {
                             console.warn("Stream parse error on chunk:", dataStr);
                         }
-                    } else if (line.trim().startsWith('{')) {
-                        // Fallback for non-SSE JSON streams from raw Vertex
-                        try {
-                            const data = JSON.parse(line.trim());
-                            let contentDelta = "";
-                            if (data.choices && data.choices[0].delta && data.choices[0].delta.content) contentDelta = data.choices[0].delta.content;
-                            else if (data.choices && data.choices[0].message && data.choices[0].message.content) contentDelta = data.choices[0].message.content;
-                            else if (data.outputs && Array.isArray(data.outputs)) contentDelta = data.outputs[0];
-                            if (contentDelta) { fullText += contentDelta; onChunk(contentDelta, fullText); }
-                        } catch(e) {}
                     }
+                }
+            }
+
+            // Fallback for non-SSE JSON (pretty printed or flat array)
+            if (!fullText && rawBuffer.trim()) {
+                try {
+                    const data = JSON.parse(rawBuffer.trim());
+                    let contentDelta = "";
+                    const item = Array.isArray(data) ? data[0] : data;
+                    if (item.choices && item.choices[0].message && item.choices[0].message.content) contentDelta = item.choices[0].message.content;
+                    else if (item.outputs && Array.isArray(item.outputs)) contentDelta = item.outputs[0];
+                    if (contentDelta) { 
+                        fullText = contentDelta; 
+                        onChunk(contentDelta, fullText); 
+                    }
+                } catch(e) {
+                    console.warn("Could not parse fallback JSON", e);
                 }
             }
             return fullText;
@@ -298,20 +308,44 @@ Do not output raw compressed text. Always format beautifully and respond in Port
     // Navigation
     // ============================================================
     function initNavigation() {
-        document.querySelectorAll('.nav-item').forEach(item => {
+        // Navigation handling
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(item => {
             item.addEventListener('click', () => {
-                switchSection(item.dataset.section);
-                document.getElementById('sidebar').classList.remove('open');
+                navItems.forEach(nav => nav.classList.remove('active'));
+                item.classList.add('active');
+                
+                const sectionId = item.getAttribute('data-section');
+                document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+                
+                const activeSec = document.getElementById(`section-${sectionId}`);
+                if (activeSec) activeSec.classList.add('active');
+
+                // Close sidebar on mobile after clicking item
+                if (window.innerWidth <= 900) {
+                    document.getElementById('sidebar').classList.remove('open');
+                }
             });
         });
+
         document.getElementById('menu-toggle').addEventListener('click', () => {
             document.getElementById('sidebar').classList.toggle('open');
         });
+
+        // Close sidebar button
+        const closeSidebarBtn = document.getElementById('close-sidebar');
+        if (closeSidebarBtn) {
+            closeSidebarBtn.addEventListener('click', () => {
+                document.getElementById('sidebar').classList.remove('open');
+            });
+        }
+
         // Close sidebar on outside click (mobile)
         document.addEventListener('click', (e) => {
             const sidebar = document.getElementById('sidebar');
             const menuBtn = document.getElementById('menu-toggle');
-            if (window.innerWidth <= 768 && sidebar.classList.contains('open') && !sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
+            const closeBtn = document.getElementById('close-sidebar'); // Include close button in check
+            if (window.innerWidth <= 900 && sidebar.classList.contains('open') && !sidebar.contains(e.target) && !menuBtn.contains(e.target) && (!closeBtn || !closeBtn.contains(e.target))) {
                 sidebar.classList.remove('open');
             }
         });
