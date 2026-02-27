@@ -14,9 +14,13 @@
     // Constants
     // ============================================================
     const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
-    const MAX_IMAGES = 5; // Máximo de imagens por mensagem
-    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/bmp', 'image/tiff', 'application/pdf'];
-    const ALLOWED_EXTS = '.jpg, .jpeg, .png, .webp, .gif, .bmp, .tiff, .pdf';
+    const MAX_VIDEO_SIZE = 150 * 1024 * 1024; // 150MB para processamento local de vídeo
+    const MAX_IMAGES = 16; // Máximo de imagens/frames por mensagem
+    const ALLOWED_TYPES = [
+        'image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/bmp', 'image/tiff', 'application/pdf',
+        'video/mp4', 'video/webm', 'video/ogg', 'video/quicktime'
+    ];
+    const ALLOWED_EXTS = '.jpg, .jpeg, .png, .webp, .gif, .bmp, .tiff, .pdf, .mp4, .webm, .ogg, .mov';
     const DB_NAME = 'MedGemmaCBM';
     const DB_VERSION = 1;
 
@@ -290,9 +294,11 @@ Do not output raw compressed text. Always format beautifully and respond in Port
     // ============================================================
     function validateFile(file) {
         if (!file) return { valid: false, error: 'Nenhum arquivo selecionado.' };
-        if (file.size > MAX_FILE_SIZE) {
+        const isVideo = file.type.startsWith('video/');
+        const limit = isVideo ? MAX_VIDEO_SIZE : MAX_FILE_SIZE;
+        if (file.size > limit) {
             const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
-            return { valid: false, error: `Arquivo muito grande (${sizeMB}MB). Limite: ${MAX_FILE_SIZE / (1024 * 1024)}MB.` };
+            return { valid: false, error: `Arquivo muito grande (${sizeMB}MB). Limite: ${limit / (1024 * 1024)}MB.` };
         }
         if (!ALLOWED_TYPES.includes(file.type)) {
             return { valid: false, error: `Tipo não suportado: ${file.type || 'desconhecido'}. Use: ${ALLOWED_EXTS}` };
@@ -437,12 +443,16 @@ Do not output raw compressed text. Always format beautifully and respond in Port
             const files = Array.from(e.target.files);
             for (const file of files) {
                 if (state.pendingImages.length >= MAX_IMAGES) {
-                    addSystemMessage(`⚠️ Máximo de ${MAX_IMAGES} imagens por mensagem.`);
+                    addSystemMessage(`⚠️ Máximo de arquivos (${MAX_IMAGES}) excedido.`);
                     break;
                 }
                 const v = validateFile(file);
-                if (v.valid) await attachImage(file);
-                else addSystemMessage('⚠️ ' + v.error);
+                if (v.valid) {
+                    if (file.type.startsWith('video/')) await processVideoFile(file);
+                    else await attachImage(file);
+                } else {
+                    addSystemMessage('⚠️ ' + v.error);
+                }
             }
             e.target.value = '';
         });
@@ -459,12 +469,16 @@ Do not output raw compressed text. Always format beautifully and respond in Port
             const files = Array.from(e.dataTransfer.files);
             for (const f of files) {
                 if (state.pendingImages.length >= MAX_IMAGES) {
-                    addSystemMessage(`⚠️ Máximo de ${MAX_IMAGES} imagens por mensagem.`);
+                    addSystemMessage(`⚠️ Máximo de arquivos (${MAX_IMAGES}) excedido.`);
                     break;
                 }
                 const v = validateFile(f);
-                if (v.valid) await attachImage(f);
-                else addSystemMessage('⚠️ ' + v.error);
+                if (v.valid) {
+                    if (f.type.startsWith('video/')) await processVideoFile(f);
+                    else await attachImage(f);
+                } else {
+                    addSystemMessage('⚠️ ' + v.error);
+                }
             }
         });
 
@@ -501,6 +515,87 @@ Do not output raw compressed text. Always format beautifully and respond in Port
         input.value = prompts[command] || '';
         input.focus();
         input.setSelectionRange(input.value.length, input.value.length);
+    }
+
+    // ============================================================
+    // Edge Video Processing (Frame Extraction)
+    // ============================================================
+    async function processVideoFile(file) {
+        addSystemMessage(`⏳ Extraindo quadros do vídeo radiológico/clínico em segundo plano: ${file.name}...`);
+        try {
+            const frames = await extractVideoFrames(file, 8); // Extrair 8 frames representativos
+            for (let i = 0; i < frames.length; i++) {
+                if (state.pendingImages.length < MAX_IMAGES) {
+                    state.pendingImages.push({
+                        base64: frames[i].base64,
+                        dataUrl: frames[i].dataUrl,
+                        mimeType: 'image/jpeg',
+                        name: `${file.name}_T${i+1}.jpg`,
+                        size: frames[i].size
+                    });
+                }
+            }
+            updateImagePreview();
+            addSystemMessage(`✅ 8 quadros do vídeo foram extraídos. Eles serão analisados em sequência temporal pela Inteligência.`);
+        } catch (e) {
+            addSystemMessage(`⚠️ Erro ao processar vídeo: ${e.message}`);
+        }
+    }
+
+    function extractVideoFrames(file, numFrames) {
+        return new Promise((resolve, reject) => {
+            const video = document.createElement('video');
+            video.playsInline = true;
+            video.preload = 'metadata';
+            video.muted = true;
+            video.src = URL.createObjectURL(file);
+            
+            video.onloadedmetadata = async () => {
+                const duration = video.duration;
+                if (!duration || !isFinite(duration)) {
+                    URL.revokeObjectURL(video.src);
+                    return reject(new Error("Não foi possível determinar a duração do vídeo."));
+                }
+                const frames = [];
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = video.videoWidth || 896;
+                canvas.height = video.videoHeight || 896;
+                
+                // Dimensione para ~896px se for muito maior para economizar memória e quota
+                if (canvas.width > 1200 || canvas.height > 1200) {
+                    const ratio = Math.min(1024/canvas.width, 1024/canvas.height);
+                    canvas.width = canvas.width * ratio;
+                    canvas.height = canvas.height * ratio;
+                }
+
+                for (let i = 0; i < numFrames; i++) {
+                    const time = (duration / (numFrames + 1)) * (i + 1);
+                    await seekVideo(video, time);
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                    const base64 = dataUrl.split(',')[1];
+                    const size = Math.round((base64.length * 3) / 4);
+                    frames.push({ dataUrl, base64, size });
+                }
+                URL.revokeObjectURL(video.src);
+                resolve(frames);
+            };
+            video.onerror = () => reject(new Error("Falha ao decodificar o stream de vídeo."));
+        });
+    }
+
+    function seekVideo(video, time) {
+        return new Promise((resolve) => {
+            const onSeeked = () => {
+                video.removeEventListener('seeked', onSeeked);
+                resolve();
+            };
+            // Se já está na posição (raro)
+            if (video.currentTime === time) return resolve();
+            video.addEventListener('seeked', onSeeked);
+            video.currentTime = time;
+        });
     }
 
     // ============================================================
