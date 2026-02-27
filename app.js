@@ -532,6 +532,9 @@ Do not output raw compressed text. Always format beautifully and respond in Port
         const welcomeMsg = msgs.querySelector('.message.assistant');
         msgs.innerHTML = '';
         if (welcomeMsg) msgs.appendChild(welcomeMsg.cloneNode(true));
+        
+        document.querySelector('.chat-wrapper').classList.remove('has-messages');
+
         msgs.querySelectorAll('.welcome-card').forEach(c => c.addEventListener('click', () => handleQuickCommand(c.dataset.command)));
         switchSection('chat');
         renderHistorySidebar();
@@ -544,6 +547,13 @@ Do not output raw compressed text. Always format beautifully and respond in Port
         state.chatHistory = conv.messages.filter(m => m.role !== 'system');
         const msgs = document.getElementById('chat-messages');
         msgs.innerHTML = '';
+
+        if (state.chatHistory.length > 0) {
+            document.querySelector('.chat-wrapper').classList.add('has-messages');
+        } else {
+            document.querySelector('.chat-wrapper').classList.remove('has-messages');
+        }
+
         for (const msg of state.chatHistory) {
             if (msg.role === 'user') {
                 const text = typeof msg.content === 'string' ? msg.content : msg.content.filter(c => c.type === 'text').map(c => c.text).join(' ');
@@ -628,6 +638,8 @@ Do not output raw compressed text. Always format beautifully and respond in Port
 
         const sendBtn = document.getElementById('chat-send-btn');
         sendBtn.disabled = true;
+
+        document.querySelector('.chat-wrapper').classList.add('has-messages');
 
         // Build content array with multiple images
         const content = [];
