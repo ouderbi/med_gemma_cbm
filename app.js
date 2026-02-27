@@ -222,6 +222,7 @@ Do not output raw compressed text. Always format beautifully and respond in Port
                             const data = JSON.parse(line.trim());
                             let contentDelta = "";
                             if (data.choices && data.choices[0].delta && data.choices[0].delta.content) contentDelta = data.choices[0].delta.content;
+                            else if (data.choices && data.choices[0].message && data.choices[0].message.content) contentDelta = data.choices[0].message.content;
                             else if (data.outputs && Array.isArray(data.outputs)) contentDelta = data.outputs[0];
                             if (contentDelta) { fullText += contentDelta; onChunk(contentDelta, fullText); }
                         } catch(e) {}
