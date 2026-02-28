@@ -895,6 +895,7 @@ Do not output raw compressed text. Always format beautifully and respond in Port
         const msgs = document.getElementById('chat-messages');
         const div = document.createElement('div');
         div.className = 'message user';
+        div.style.animation = 'none'; // Pause animation initially
         let html = '<div class="message-avatar">👤</div><div class="message-content">';
 
         // Show images (real or placeholder)
@@ -909,6 +910,11 @@ Do not output raw compressed text. Always format beautifully and respond in Port
         html += '</div>';
         div.innerHTML = html;
         msgs.appendChild(div);
+        
+        // Trigger reflow to restart animation smoothly
+        void div.offsetWidth;
+        div.style.animation = '';
+        
         scrollToBottom(true); // Force scroll for user messages
     }
 
@@ -916,8 +922,15 @@ Do not output raw compressed text. Always format beautifully and respond in Port
         const msgs = document.getElementById('chat-messages');
         const div = document.createElement('div');
         div.className = 'message assistant';
+        div.style.animation = 'none'; // Pause animation initially
+        
         div.innerHTML = `<div class="message-avatar">🧬</div><div class="message-content">${formatText(text)}</div>`;
         msgs.appendChild(div);
+        
+        // Trigger reflow to restart animation smoothly
+        void div.offsetWidth;
+        div.style.animation = '';
+        
         scrollToBottom();
     }
 
@@ -976,6 +989,8 @@ Do not output raw compressed text. Always format beautifully and respond in Port
         const msgs = document.getElementById('chat-messages');
         const div = document.createElement('div');
         div.className = 'message assistant';
+        div.style.animation = 'none'; // Pause animation initially
+        
         let html = '<div class="message-avatar">🧬</div><div class="message-content">';
         switch (data.type) {
             case 'quiz': html += renderQuiz(data); break;
@@ -985,9 +1000,15 @@ Do not output raw compressed text. Always format beautifully and respond in Port
         html += '</div>';
         div.innerHTML = html;
         msgs.appendChild(div);
+        
         if (data.type === 'quiz') initQuizInteraction(div, data);
         if (data.type === 'flashcards') initFlashcardInteraction(div, data);
         if (data.type === 'case_study') initCaseInteraction(div);
+        
+        // Trigger reflow to restart animation smoothly
+        void div.offsetWidth;
+        div.style.animation = '';
+        
         scrollToBottom();
     }
 
