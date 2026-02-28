@@ -124,7 +124,8 @@
 2. Para Avaliações Práticas (OSCE/Mini-CEX): Gere de forma OBRIGATÓRIA as instruções para o ator/simulador, as diretrizes para o aluno, e um *Checklist do Avaliador* em formato de Tabela com pontuações.
 3. Para Metodologias Ativas (PBL/TBL): Crie "Problemas" (Gatilhos) complexos, divididos em aberturas e fechamentos progressivos.
 4. Para Clínica e Resumos: Ancora-se nas diretrizes (SUS, AMB, AHA, etc) e sugira bibliografias-chave.
-[FORMAT] Responda ESTRITAMENTE em Português (Brasil). O material deve ser altamente formatado usando Markdown avançado. Use Títulos (###), Tabelas (indispensável para cronogramas ou rubricas), e Bullets. NUNCA gere blocos de texto gigantes e difíceis de ler. Seja direto e acadêmico.`,
+[FORMAT] Responda ESTRITAMENTE em Português (Brasil). O material deve ser altamente formatado usando Markdown avançado. Use Títulos (###), Tabelas (indispensável para cronogramas ou rubricas), e Bullets. NUNCA gere blocos de texto gigantes e difíceis de ler. Seja direto e acadêmico.
+[COGNITIVE PROCESS] ANTES de emitir a resposta final, você DEVE OBRIGATORIAMENTE abrir uma tag <thought>, escrever todo o seu plano de aula/raciocínio passo a passo lá dentro, e depois fechar com </thought>. Só então emita o Markdown final.`,
             temperature: 0.3, maxTokens: 4096
         },
         EXAM_FACTORY: {
@@ -136,7 +137,8 @@ REGRAS OBRIGATÓRIAS:
 1. OBRIGATÓRIO: Toda questão deve iniciar com um "Caso Clínico" (Clinical Vignette) rico em detalhes pertinentes (HMA, Exame Físico, Laboratório). Nada de perguntas curtas e diretas.
 2. OBRIGATÓRIO: Forneça opções de A a E plausíveis (distratores de alta qualidade).
 3. OBRIGATÓRIO: Ao final de toda a prova, crie uma seção "GABARITO COMENTADO". Para *cada questão*, diga qual é a certa e EXPLIQUE DETALHADAMENTE COMO A FISIOPATOLOGIA DESCARTA AS OPÇÕES ERRADAS.
-[FORMAT] Responda APENAS em Português do Brasil usando Markdown Puro (### Para o Título da Prova, **Negrito** para as perguntas/alternativas, e blockquotes > para o Gabarito). NÃO USE JSON AQUI. Estruture como um documento de prova real pronto para impressão.`,
+[FORMAT] Responda APENAS em Português do Brasil usando Markdown Puro (### Para o Título da Prova, **Negrito** para as perguntas/alternativas, e blockquotes > para o Gabarito). NÃO USE JSON AQUI. Estruture como um documento de prova real pronto para impressão.
+[COGNITIVE PROCESS] ANTES de emitir a prova, ABRA uma tag <thought>, rascunhe os casos clínicos e as 5 alternativas de distratores lá dentro, FECHE com </thought>, e só então emita a prova final em markdown.`,
             temperature: 0.4, maxTokens: 8192
         },
         QUIZ: {
@@ -172,7 +174,8 @@ Use spoiler:true apenas para a resolução final do caso (Diagnóstico Definitiv
             patterns: [/an[aá]lis.*imagem/i, /raio.?x/i, /radiolog/i, /descrev.*imagem/i, /laudo/i, /xray/i, /tomografia/i, /resson[aâ]ncia/i, /histopatolog/i, /dermatolog/i, /oftalmolog/i, /fundoscop/i, /ct\b/i, /mri\b/i],
             systemPrompt: `[ROLE] You are an expert medical radiologist and diagnostic imager.
 [TASK] Analyze the provided medical image(s) step by step and provide a structured, professional radiologist report. Identify key anatomical landmarks and highlight abnormalities.
-[FORMAT] Use clear sections indicating Findings, Impression, and Recommendations. Respond in Portuguese (Brazil).`,
+[FORMAT] Use clear sections indicating Findings, Impression, and Recommendations. Respond in Portuguese (Brazil).
+[COGNITIVE PROCESS] BEFORE outputting the final report, open a <thought> tag, analyze the image anatomically and pathologically inside it, close it with </thought>, and then output the medical report.`,
             temperature: 0.2, maxTokens: 4096
         },
         CHAT: {
@@ -186,7 +189,8 @@ Use spoiler:true apenas para a resolução final do caso (Diagnóstico Definitiv
 3. USE BULLET POINTS (- or *) profusely to list items or differentials. Add a blank line before and after lists.
 4. HIGHLIGHT key medical terms, conditions, and concepts in **bold**.
 5. Emphasize important warnings or concepts in *italics* or blockquotes (>).
-Do not output raw compressed text. Always format beautifully and respond in Portuguese (Brazil).`,
+Do not output raw compressed text. Always format beautifully and respond in Portuguese (Brazil).
+[COGNITIVE PROCESS] ANTES de falar com o aluno, INICIE sua resposta com a tag <thought>. Avalie o caso clínicamente passo a passo dentro do thought (Diferenciais, Fisiopatologia, Conduta). Feche com </thought>. APÓS isso, responda como Tutor aplicando o método socrático.`,
             temperature: 0.3, maxTokens: 4096
         }
     };
@@ -254,7 +258,31 @@ Do not output raw compressed text. Always format beautifully and respond in Port
                             }
                             if (contentDelta) {
                                 fullText += contentDelta;
-                                onChunk(contentDelta, fullText);
+                                
+                                // --- Chain of Thought (Thinking) Parser State Machine ---
+                                let displayHtml = "";
+                                let thoughtHtml = "";
+                                
+                                const thoughtStartIdx = fullText.indexOf("<thought>");
+                                if (thoughtStartIdx !== -1) {
+                                    const thoughtEndIdx = fullText.indexOf("</thought>");
+                                    
+                                    if (thoughtEndIdx !== -1) {
+                                        // Thought has finished
+                                        const rawThought = fullText.substring(thoughtStartIdx + 9, thoughtEndIdx).trim();
+                                        thoughtHtml = rawThought;
+                                        displayHtml = fullText.substring(thoughtEndIdx + 10).trim();
+                                    } else {
+                                        // Still thinking
+                                        const rawThought = fullText.substring(thoughtStartIdx + 9).trim();
+                                        thoughtHtml = rawThought;
+                                        displayHtml = fullText.substring(0, thoughtStartIdx).trim(); // Text before thought (rare)
+                                    }
+                                } else {
+                                    displayHtml = fullText;
+                                }
+
+                                onChunk(contentDelta, fullText, displayHtml, thoughtHtml);
                             }
                         } catch (e) {
                             console.warn("Stream parse error on chunk:", dataStr);
@@ -823,14 +851,47 @@ Do not output raw compressed text. Always format beautifully and respond in Port
                 const msgs = document.getElementById('chat-messages');
                 const streamDiv = document.createElement('div');
                 streamDiv.className = 'message assistant streaming';
-                streamDiv.innerHTML = `<div class="message-avatar">🧬</div><div class="message-content"></div>`;
+                streamDiv.innerHTML = `
+                    <div class="message-avatar">🧬</div>
+                    <div class="message-content">
+                        <div class="thought-container hidden">
+                            <div class="thought-header"><span class="thought-spinner">⚙️</span> Pensando...</div>
+                            <div class="thought-content"></div>
+                        </div>
+                        <div class="final-content"></div>
+                    </div>`;
                 
                 removeTyping(typingId);
                 msgs.appendChild(streamDiv);
-                const contentNode = streamDiv.querySelector('.message-content');
+                
+                const finalContentNode = streamDiv.querySelector('.final-content');
+                const thoughtContainerNode = streamDiv.querySelector('.thought-container');
+                const thoughtContentNode = streamDiv.querySelector('.thought-content');
+                const thoughtHeaderNode = streamDiv.querySelector('.thought-header');
 
-                finalResponseText = await sendToMedGemma(messages, maxTokens, temperature, (delta, fullText) => {
-                    contentNode.innerHTML = formatText(fullText);
+                // Toggle Accordion Click
+                thoughtHeaderNode.addEventListener('click', () => {
+                    thoughtContainerNode.classList.toggle('expanded');
+                });
+
+                finalResponseText = await sendToMedGemma(messages, maxTokens, temperature, (delta, fullText, displayHtml, thoughtHtml) => {
+                    if (thoughtHtml) {
+                        thoughtContainerNode.classList.remove('hidden');
+                        thoughtContentNode.innerHTML = formatText(thoughtHtml);
+                        
+                        // Stop spinner if finished thinking
+                        if (fullText.includes("</thought>")) {
+                            thoughtContainerNode.classList.add('finished');
+                            thoughtHeaderNode.innerHTML = `<span>🧠</span> Processo Concluído (Ver Raciocínio)`;
+                        } else {
+                            thoughtContainerNode.classList.remove('finished');
+                            thoughtHeaderNode.innerHTML = `<span class="thought-spinner">⚙️</span> Pensando...`;
+                        }
+                    } else {
+                        thoughtContainerNode.classList.add('hidden');
+                    }
+                    
+                    finalContentNode.innerHTML = formatText(displayHtml);
                     scrollToBottom();
                 });
                 
