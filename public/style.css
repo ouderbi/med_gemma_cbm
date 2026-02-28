@@ -350,6 +350,19 @@ a:hover { color: var(--text-primary); }
 /* System Message */
 .message.system-msg .system-content { font-size: 0.9rem; color: var(--status-off); background: rgba(239, 68, 68, 0.1); padding: 10px 16px; border-radius: var(--radius-pill); border: 1px solid rgba(239, 68, 68, 0.2); }
 
+/* Chain of Thought (Thinking) Accordion */
+.thought-container { margin-bottom: 16px; border: 1px solid var(--card-border); border-radius: var(--radius-md); background: rgba(0,0,0,0.15); overflow: hidden; transition: all 0.3s; }
+[data-theme="light"] .thought-container { background: rgba(0,0,0,0.03); }
+.thought-container.hidden { display: none; }
+.thought-header { padding: 12px 16px; font-size: 0.9rem; font-weight: 600; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 8px; user-select: none; transition: background 0.2s; }
+.thought-header:hover { background: rgba(255,255,255,0.05); color: var(--text-secondary); }
+[data-theme="light"] .thought-header:hover { background: rgba(0,0,0,0.05); }
+.thought-spinner { display: inline-block; animation: spin 2s linear infinite; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
+.thought-content { max-height: 0; padding: 0 16px; opacity: 0; font-size: 0.9rem; color: var(--text-muted); font-style: italic; overflow: hidden; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+.thought-container.expanded .thought-content { max-height: 1500px; padding: 16px; opacity: 1; border-top: 1px dashed var(--card-border); overflow-y: auto; scrollbar-width: thin; }
+.thought-container.finished .thought-header { color: var(--accent); }
+
 /* ============================================================
    INTERACTION DOCK (Floating Input)
    ============================================================ */
