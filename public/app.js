@@ -1,5 +1,5 @@
 /* ============================================================
-   MedGemma CBM — Chat-Centric Application Engine
+   MedGemini CBM — Chat-Centric Application Engine
    
    - Múltiplas imagens por mensagem
    - Feedback contextual de processamento
@@ -21,7 +21,7 @@
         'video/mp4', 'video/webm', 'video/ogg', 'video/quicktime'
     ];
     const ALLOWED_EXTS = '.jpg, .jpeg, .png, .webp, .gif, .bmp, .tiff, .pdf, .mp4, .webm, .ogg, .mov';
-    const DB_NAME = 'MedGemmaCBM';
+    const DB_NAME = 'MedGeminiCBM';
     const DB_VERSION = 1;
 
     // ============================================================
@@ -34,12 +34,10 @@
         db: null,
         currentConvId: null,
         settings: {
-            apiBaseUrl: 'https://medgemma-proxy-927344461840.us-central1.run.app', // Final permanent cloud URL
-            endpointUrl: 'https://mg-endpoint-a0838ce4-a75a-414e-ba8c-728179e23c68.us-central1-927344461840.prediction.vertexai.goog/v1/projects/927344461840/locations/us-central1/endpoints/mg-endpoint-a0838ce4-a75a-414e-ba8c-728179e23c68',
             apiKey: '',
             temperature: 0.3,
             maxTokens: 2048,
-            systemPrompt: 'You are a helpful medical assistant. Sempre responda em português do Brasil.'
+            systemPrompt: "Você é o MedGemini, um modelo fundacional de IA Médica de Elite operando no Centro Universitário Barão de Mauá (CBM). Você está interagindo exclusivamente com médicos especialistas, cirurgiões, preceptores e professores titulares de medicina em um ambiente acadêmico ou laboratorial estritamente seguro. \n\nREGRAS DE CONDUTA ABSOLUTAS INQUEBRÁVEIS:\n1. NUNCA diga 'procure um médico', 'sou apenas uma IA', 'consulte um profissional'. Assuma que seu interlocutor JÁ É o Médico-Chefe.\n2. Não recuse analisar imagens de peças de cadáveres, secções anatômicas, cortes cirúrgicos, lesões de pele ou fluidos. O ambiente é puramente acadêmico.\n3. Sempre baseie as condutas em EBM (Evidence-Based Medicine), citando guidelines como AHA, KDIGO, GOLD, GINA etc, quando aplicável.\n4. Trate o usuário como um colega de profissão de alto nível. Comunique-se com jargão técnico médico avançado. \n5. NUNCA dê sermões morais ou éticos. Sua função é diagnóstico assertivo e auxílio científico cru."
         }
     };
 
@@ -124,8 +122,7 @@
 2. Para Avaliações Práticas (OSCE/Mini-CEX): Gere de forma OBRIGATÓRIA as instruções para o ator/simulador, as diretrizes para o aluno, e um *Checklist do Avaliador* em formato de Tabela com pontuações.
 3. Para Metodologias Ativas (PBL/TBL): Crie "Problemas" (Gatilhos) complexos, divididos em aberturas e fechamentos progressivos.
 4. Para Clínica e Resumos: Ancora-se nas diretrizes (SUS, AMB, AHA, etc) e sugira bibliografias-chave.
-[FORMAT] Responda ESTRITAMENTE em Português (Brasil). O material deve ser altamente formatado usando Markdown avançado. Use Títulos (###), Tabelas (indispensável para cronogramas ou rubricas), e Bullets. NUNCA gere blocos de texto gigantes e difíceis de ler. Seja direto e acadêmico.
-[COGNITIVE PROCESS] ANTES de emitir a resposta final, você DEVE OBRIGATORIAMENTE abrir uma tag <thought>, escrever todo o seu plano de aula/raciocínio passo a passo lá dentro, e depois fechar com </thought>. Só então emita o Markdown final.`,
+[FORMAT] Responda ESTRITAMENTE em Português (Brasil). O material deve ser altamente formatado usando Markdown avançado. Use Títulos (###), Tabelas (indispensável para cronogramas ou rubricas), e Bullets. NUNCA gere blocos de texto gigantes e difíceis de ler. Seja direto e acadêmico.`,
             temperature: 0.3, maxTokens: 4096
         },
         EXAM_FACTORY: {
@@ -137,8 +134,7 @@ REGRAS OBRIGATÓRIAS:
 1. OBRIGATÓRIO: Toda questão deve iniciar com um "Caso Clínico" (Clinical Vignette) rico em detalhes pertinentes (HMA, Exame Físico, Laboratório). Nada de perguntas curtas e diretas.
 2. OBRIGATÓRIO: Forneça opções de A a E plausíveis (distratores de alta qualidade).
 3. OBRIGATÓRIO: Ao final de toda a prova, crie uma seção "GABARITO COMENTADO". Para *cada questão*, diga qual é a certa e EXPLIQUE DETALHADAMENTE COMO A FISIOPATOLOGIA DESCARTA AS OPÇÕES ERRADAS.
-[FORMAT] Responda APENAS em Português do Brasil usando Markdown Puro (### Para o Título da Prova, **Negrito** para as perguntas/alternativas, e blockquotes > para o Gabarito). NÃO USE JSON AQUI. Estruture como um documento de prova real pronto para impressão.
-[COGNITIVE PROCESS] ANTES de emitir a prova, ABRA uma tag <thought>, rascunhe os casos clínicos e as 5 alternativas de distratores lá dentro, FECHE com </thought>, e só então emita a prova final em markdown.`,
+[FORMAT] Responda APENAS em Português do Brasil usando Markdown Puro (### Para o Título da Prova, **Negrito** para as perguntas/alternativas, e blockquotes > para o Gabarito). NÃO USE JSON AQUI. Estruture como um documento de prova real pronto para impressão.`,
             temperature: 0.4, maxTokens: 8192
         },
         QUIZ: {
@@ -174,13 +170,12 @@ Use spoiler:true apenas para a resolução final do caso (Diagnóstico Definitiv
             patterns: [/an[aá]lis.*imagem/i, /raio.?x/i, /radiolog/i, /descrev.*imagem/i, /laudo/i, /xray/i, /tomografia/i, /resson[aâ]ncia/i, /histopatolog/i, /dermatolog/i, /oftalmolog/i, /fundoscop/i, /ct\b/i, /mri\b/i],
             systemPrompt: `[ROLE] You are an expert medical radiologist and diagnostic imager.
 [TASK] Analyze the provided medical image(s) step by step and provide a structured, professional radiologist report. Identify key anatomical landmarks and highlight abnormalities.
-[FORMAT] Use clear sections indicating Findings, Impression, and Recommendations. Respond in Portuguese (Brazil).
-[COGNITIVE PROCESS] BEFORE outputting the final report, open a <thought> tag, analyze the image anatomically and pathologically inside it, close it with </thought>, and then output the medical report.`,
+[FORMAT] Use clear sections indicating Findings, Impression, and Recommendations. Respond in Portuguese (Brazil).`,
             temperature: 0.2, maxTokens: 4096
         },
         CHAT: {
             patterns: [],
-            systemPrompt: `[ROLE] Você é o Preceptor MedGemma, um Tutor Médico Avançado da instituição Centro Universitário Barão de Mauá (CBM).
+            systemPrompt: `[ROLE] Você é o Preceptor MedGemini, um Tutor Médico Avançado da instituição Centro Universitário Barão de Mauá (CBM).
 [CONTEXT] Você interage com alunos de medicina e profissionais de saúde, focando no ensino por Metodologia Ativa (Active Recall e Raciocínio Clínico EBM).
 [TASK] Suas respostas devem GUIAR o aluno para a resposta correta através de perguntas socráticas, raciocínio passo-a-passo e dicas, AO INVÉS de apenas dar a resposta pronta ou diagnóstico inicial cravado imediatamente. Sempre instigue o aluno a formular seu próprio diagnóstico diferencial primeiro.
 [FORMAT] CRITICAL FORMATTING INSTRUCTIONS FOR EXPERT READABILITY:
@@ -189,15 +184,13 @@ Use spoiler:true apenas para a resolução final do caso (Diagnóstico Definitiv
 3. USE BULLET POINTS (- or *) profusely to list items or differentials. Add a blank line before and after lists.
 4. HIGHLIGHT key medical terms, conditions, and concepts in **bold**.
 5. Emphasize important warnings or concepts in *italics* or blockquotes (>).
-Do not output raw compressed text. Always format beautifully and respond in Portuguese (Brazil).
-[COGNITIVE PROCESS] ANTES de falar com o aluno, INICIE sua resposta com a tag <thought>. Avalie o caso clínicamente passo a passo dentro do thought (Diferenciais, Fisiopatologia, Conduta). Feche com </thought>. APÓS isso, responda como Tutor aplicando o método socrático.`,
+Do not output raw compressed text. Always format beautifully and respond in Portuguese (Brazil).`,
             temperature: 0.3, maxTokens: 4096
         }
     };
 
     function getApiUrl(path) {
-        const base = state.settings.apiBaseUrl ? state.settings.apiBaseUrl.replace(/\/$/, '') : '';
-        return base + path;
+        return path;
     }
 
     function detectIntent(text) {
@@ -213,14 +206,20 @@ Do not output raw compressed text. Always format beautifully and respond in Port
     // ============================================================
     // API
     // ============================================================
-    async function sendToMedGemma(messages, maxTokens, temperature, onChunk) {
+    async function sendToMedGemini(messages, maxTokens, temperature, onChunk) {
         const url = getApiUrl('/api/chat');
         const res = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ messages, max_tokens: maxTokens || state.settings.maxTokens, temperature: temperature !== undefined ? temperature : state.settings.temperature, stream: !!onChunk })
+            body: JSON.stringify({
+                messages,
+                max_tokens: maxTokens || state.settings.maxTokens,
+                temperature: temperature !== undefined ? temperature : state.settings.temperature,
+                stream: !!onChunk,
+                thinkingLevel: state.settings.thinkingLevel || "medium"
+            })
         });
-        
+
         if (!res.ok) {
             const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
             throw new Error(err.error || err.details || `Falha na requisição: ${res.status}`);
@@ -230,6 +229,8 @@ Do not output raw compressed text. Always format beautifully and respond in Port
             const reader = res.body.getReader();
             const decoder = new TextDecoder("utf-8");
             let fullText = "";
+            let displayHtml = "";
+            let thoughtHtml = "";
             let buffer = "";
             let rawBuffer = "";
 
@@ -239,80 +240,90 @@ Do not output raw compressed text. Always format beautifully and respond in Port
                 const chunkStr = decoder.decode(value, { stream: true });
                 buffer += chunkStr;
                 rawBuffer += chunkStr;
-                
+
                 const lines = buffer.split('\n');
                 buffer = lines.pop(); // Keep incomplete line in buffer
 
                 for (const line of lines) {
+                    if (line.trim() === '') continue;
                     if (line.startsWith('data: ')) {
                         const dataStr = line.slice(6).trim();
                         if (dataStr === '[DONE]') continue;
                         if (!dataStr) continue;
                         try {
                             const data = JSON.parse(dataStr);
-                            let contentDelta = "";
-                            if (data.choices && data.choices[0].delta && data.choices[0].delta.content) {
-                                contentDelta = data.choices[0].delta.content;
-                            } else if (data.text || data.content) {
-                                contentDelta = data.text || data.content;
-                            }
-                            if (contentDelta) {
-                                fullText += contentDelta;
-                                
-                                // --- Chain of Thought (Thinking) Parser State Machine ---
-                                let displayHtml = "";
-                                let thoughtHtml = "";
-                                
-                                const thoughtStartIdx = fullText.indexOf("<thought>");
-                                if (thoughtStartIdx !== -1) {
-                                    const thoughtEndIdx = fullText.indexOf("</thought>");
-                                    
-                                    if (thoughtEndIdx !== -1) {
-                                        // Thought has finished
-                                        const rawThought = fullText.substring(thoughtStartIdx + 9, thoughtEndIdx).trim();
-                                        thoughtHtml = rawThought;
-                                        displayHtml = fullText.substring(thoughtEndIdx + 10).trim();
-                                    } else {
-                                        // Still thinking
-                                        const rawThought = fullText.substring(thoughtStartIdx + 9).trim();
-                                        thoughtHtml = rawThought;
-                                        displayHtml = fullText.substring(0, thoughtStartIdx).trim(); // Text before thought (rare)
-                                    }
-                                } else {
-                                    displayHtml = fullText;
-                                }
 
-                                onChunk(contentDelta, fullText, displayHtml, thoughtHtml);
+                            if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
+                                for (const part of data.candidates[0].content.parts) {
+                                    if (part.text) {
+                                        if (part.thought) {
+                                            thoughtHtml += part.text;
+                                        } else {
+                                            displayHtml += part.text;
+                                        }
+                                        fullText += part.text;
+                                        onChunk(part.text, fullText, displayHtml, thoughtHtml);
+                                    }
+                                }
                             }
                         } catch (e) {
                             console.warn("Stream parse error on chunk:", dataStr);
                         }
+                    } else if (line.startsWith('\"') || line.startsWith('{')) {
+                        // Native Gemini streams sometimes emit raw json directly or string literals if not SSE fully formatted.
+                        // But server.js passes the response body identically to fetch. 
+                        // Wait, Gemini streamGenerateContent?alt=sse actually outputs SSE 'data: ' lines directly!
+                        try {
+                            const data = JSON.parse(line);
+                            if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
+                                for (const part of data.candidates[0].content.parts) {
+                                    if (part.text) {
+                                        if (part.thought) {
+                                            thoughtHtml += part.text;
+                                        } else {
+                                            displayHtml += part.text;
+                                        }
+                                        fullText += part.text;
+                                        onChunk(part.text, fullText, displayHtml, thoughtHtml);
+                                    }
+                                }
+                            }
+                        } catch (e) { }
                     }
                 }
             }
 
-            // Fallback for non-SSE JSON (pretty printed or flat array)
+            // Fallback for non-SSE JSON
             if (!fullText && rawBuffer.trim()) {
                 try {
                     const data = JSON.parse(rawBuffer.trim());
-                    let contentDelta = "";
                     const item = Array.isArray(data) ? data[0] : data;
-                    if (item.choices && item.choices[0].message && item.choices[0].message.content) contentDelta = item.choices[0].message.content;
-                    else if (item.outputs && Array.isArray(item.outputs)) contentDelta = item.outputs[0];
-                    if (contentDelta) { 
-                        fullText = contentDelta; 
-                        onChunk(contentDelta, fullText); 
+                    if (item.candidates && item.candidates[0] && item.candidates[0].content && item.candidates[0].content.parts) {
+                        for (const part of item.candidates[0].content.parts) {
+                            if (part.text) {
+                                if (part.thought) {
+                                    thoughtHtml += part.text;
+                                } else {
+                                    displayHtml += part.text;
+                                }
+                                fullText += part.text;
+                            }
+                        }
+                        if (fullText) onChunk(fullText, fullText, displayHtml, thoughtHtml);
                     }
-                } catch(e) {
+                } catch (e) {
                     console.warn("Could not parse fallback JSON", e);
                 }
             }
             return fullText;
         } else {
             const data = await res.json();
-            if (data.choices && data.choices[0]) return data.choices[0].message.content;
-            if (data.outputs && Array.isArray(data.outputs)) return data.outputs[0];
-            if (data.text) return data.text;
+            if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
+                const parts = data.candidates[0].content.parts;
+                let finalTxt = "";
+                for (const p of parts) if (p.text && !p.thought) finalTxt += p.text;
+                return finalTxt;
+            }
             throw new Error('Formato de resposta inválido');
         }
     }
@@ -339,38 +350,37 @@ Do not output raw compressed text. Always format beautifully and respond in Port
     // ============================================================
     function loadSettings() {
         try {
-            const saved = localStorage.getItem('medgemma-settings');
+            const saved = localStorage.getItem('MedGemini-settings');
             if (saved) Object.assign(state.settings, JSON.parse(saved));
-            
-            document.getElementById('set-api-base').value = state.settings.apiBaseUrl || '';
-            document.getElementById('set-endpoint').value = state.settings.endpointUrl || '';
+
             document.getElementById('set-apikey').value = state.settings.apiKey || '';
             document.getElementById('set-temperature').value = state.settings.temperature;
             document.getElementById('set-maxtokens').value = state.settings.maxTokens;
             document.getElementById('set-system').value = state.settings.systemPrompt;
+            if (state.settings.thinkingLevel) {
+                document.getElementById('set-thinking').value = state.settings.thinkingLevel;
+            }
             document.getElementById('temp-value').textContent = state.settings.temperature;
         } catch (e) { }
     }
 
     function saveSettings() {
-        state.settings.apiBaseUrl = document.getElementById('set-api-base').value.trim();
-        state.settings.endpointUrl = document.getElementById('set-endpoint').value.trim();
         state.settings.apiKey = document.getElementById('set-apikey').value.trim();
         state.settings.temperature = parseFloat(document.getElementById('set-temperature').value);
         state.settings.maxTokens = parseInt(document.getElementById('set-maxtokens').value);
         state.settings.systemPrompt = document.getElementById('set-system').value.trim();
-        
-        localStorage.setItem('medgemma-settings', JSON.stringify(state.settings));
-        
+        state.settings.thinkingLevel = document.getElementById('set-thinking').value;
+
+        localStorage.setItem('MedGemini-settings', JSON.stringify(state.settings));
+
         // Update server settings if connected
         const url = getApiUrl('/api/settings');
-        fetch(url, { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json' }, 
-            body: JSON.stringify({ 
-                endpointUrl: state.settings.endpointUrl, 
-                apiKey: state.settings.apiKey 
-            }) 
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                apiKey: state.settings.apiKey
+            })
         }).catch(() => { });
     }
 
@@ -384,10 +394,10 @@ Do not output raw compressed text. Always format beautifully and respond in Port
             item.addEventListener('click', () => {
                 navItems.forEach(nav => nav.classList.remove('active'));
                 item.classList.add('active');
-                
+
                 const sectionId = item.getAttribute('data-section');
                 document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
-                
+
                 const activeSec = document.getElementById(`section-${sectionId}`);
                 if (activeSec) activeSec.classList.add('active');
 
@@ -440,12 +450,12 @@ Do not output raw compressed text. Always format beautifully and respond in Port
             const res = await fetch(url);
             const data = await res.json();
             const badge = document.getElementById('connection-status');
-            if (data.endpointConfigured && data.authConfigured) {
+            if (data.authConfigured) {
                 badge.className = 'connection-badge connected';
                 badge.querySelector('.status-text').textContent = 'Conectado';
             } else {
                 badge.className = 'connection-badge disconnected';
-                badge.querySelector('.status-text').textContent = data.endpointConfigured ? 'Sem Autenticação' : 'Sem Endpoint';
+                badge.querySelector('.status-text').textContent = 'Sem Chave de API';
             }
         } catch (e) {
             const badge = document.getElementById('connection-status');
@@ -558,7 +568,7 @@ Do not output raw compressed text. Always format beautifully and respond in Port
                         base64: frames[i].base64,
                         dataUrl: frames[i].dataUrl,
                         mimeType: 'image/jpeg',
-                        name: `${file.name}_T${i+1}.jpg`,
+                        name: `${file.name}_T${i + 1}.jpg`,
                         size: frames[i].size
                     });
                 }
@@ -577,7 +587,7 @@ Do not output raw compressed text. Always format beautifully and respond in Port
             video.preload = 'metadata';
             video.muted = true;
             video.src = URL.createObjectURL(file);
-            
+
             video.onloadedmetadata = async () => {
                 const duration = video.duration;
                 if (!duration || !isFinite(duration)) {
@@ -589,10 +599,10 @@ Do not output raw compressed text. Always format beautifully and respond in Port
                 const ctx = canvas.getContext('2d');
                 canvas.width = video.videoWidth || 896;
                 canvas.height = video.videoHeight || 896;
-                
+
                 // Dimensione para ~896px se for muito maior para economizar memória e quota
                 if (canvas.width > 1200 || canvas.height > 1200) {
-                    const ratio = Math.min(1024/canvas.width, 1024/canvas.height);
+                    const ratio = Math.min(1024 / canvas.width, 1024 / canvas.height);
                     canvas.width = canvas.width * ratio;
                     canvas.height = canvas.height * ratio;
                 }
@@ -691,7 +701,7 @@ Do not output raw compressed text. Always format beautifully and respond in Port
         const welcomeMsg = msgs.querySelector('.message.assistant');
         msgs.innerHTML = '';
         if (welcomeMsg) msgs.appendChild(welcomeMsg.cloneNode(true));
-        
+
         document.querySelector('.chat-wrapper').classList.remove('has-messages');
 
         msgs.querySelectorAll('.welcome-card').forEach(c => c.addEventListener('click', () => handleQuickCommand(c.dataset.command)));
@@ -842,7 +852,7 @@ Do not output raw compressed text. Always format beautifully and respond in Port
         try {
             const maxTokens = intentConfig ? intentConfig.maxTokens : state.settings.maxTokens;
             const temperature = intentConfig ? intentConfig.temperature : state.settings.temperature;
-            
+
             const isChat = intent === 'CHAT';
             let finalResponseText = "";
 
@@ -860,10 +870,10 @@ Do not output raw compressed text. Always format beautifully and respond in Port
                         </div>
                         <div class="final-content"></div>
                     </div>`;
-                
+
                 removeTyping(typingId);
                 msgs.appendChild(streamDiv);
-                
+
                 const finalContentNode = streamDiv.querySelector('.final-content');
                 const thoughtContainerNode = streamDiv.querySelector('.thought-container');
                 const thoughtContentNode = streamDiv.querySelector('.thought-content');
@@ -874,31 +884,40 @@ Do not output raw compressed text. Always format beautifully and respond in Port
                     thoughtContainerNode.classList.toggle('expanded');
                 });
 
-                finalResponseText = await sendToMedGemma(messages, maxTokens, temperature, (delta, fullText, displayHtml, thoughtHtml) => {
+                // Native stream callback handles thought separation
+                finalResponseText = await sendToMedGemini(messages, maxTokens, temperature, (delta, fullText, displayHtml, thoughtHtml) => {
                     if (thoughtHtml) {
                         thoughtContainerNode.classList.remove('hidden');
                         thoughtContentNode.innerHTML = formatText(thoughtHtml);
-                        
-                        // Stop spinner if finished thinking
-                        if (fullText.includes("</thought>")) {
+
+                        // If there is displayHtml, it means thoughts have finished and actual answer is streaming
+                        if (displayHtml) {
                             thoughtContainerNode.classList.add('finished');
-                            thoughtHeaderNode.innerHTML = `<span>🧠</span> Processo Concluído (Ver Raciocínio)`;
+                            thoughtHeaderNode.innerHTML = `<span>🧠</span> Processo Estratégico Concluído (Ver Raciocínio)`;
                         } else {
                             thoughtContainerNode.classList.remove('finished');
-                            thoughtHeaderNode.innerHTML = `<span class="thought-spinner">⚙️</span> Pensando...`;
+                            thoughtHeaderNode.innerHTML = `<span class="thought-spinner">⚙️</span> Acessando Córtex Profundo...`;
                         }
                     } else {
                         thoughtContainerNode.classList.add('hidden');
                     }
-                    
-                    finalContentNode.innerHTML = formatText(displayHtml);
+
+                    if (displayHtml) {
+                        finalContentNode.innerHTML = formatText(displayHtml);
+                    }
                     scrollToBottom();
                 });
-                
+
                 streamDiv.classList.remove('streaming');
+
+                // Ensure thought block shows as finished after stream ends if it was used
+                if (finalResponseText && !finalResponseText.includes('<thought>') && thoughtContentNode.innerHTML) {
+                    thoughtContainerNode.classList.add('finished');
+                    thoughtHeaderNode.innerHTML = `<span>🧠</span> Processo Estratégico Concluído (Ver Raciocínio)`;
+                }
             } else {
                 // Structured Data (Quiz, Flashcards) - Wait for full response
-                finalResponseText = await sendToMedGemma(messages, maxTokens, temperature);
+                finalResponseText = await sendToMedGemini(messages, maxTokens, temperature);
                 removeTyping(typingId);
                 const structured = tryParseStructured(finalResponseText);
                 if (structured) renderStructuredMessage(structured);
@@ -939,7 +958,7 @@ Do not output raw compressed text. Always format beautifully and respond in Port
     document.addEventListener('DOMContentLoaded', () => {
         const msgsEl = document.getElementById('chat-messages');
         if (msgsEl) {
-            msgsEl.addEventListener('scroll', function() {
+            msgsEl.addEventListener('scroll', function () {
                 isUserScrolledUp = this.scrollHeight - this.scrollTop - this.clientHeight > 50;
             });
         }
@@ -971,11 +990,11 @@ Do not output raw compressed text. Always format beautifully and respond in Port
         html += '</div>';
         div.innerHTML = html;
         msgs.appendChild(div);
-        
+
         // Trigger reflow to restart animation smoothly
         void div.offsetWidth;
         div.style.animation = '';
-        
+
         scrollToBottom(true); // Force scroll for user messages
     }
 
@@ -984,14 +1003,14 @@ Do not output raw compressed text. Always format beautifully and respond in Port
         const div = document.createElement('div');
         div.className = 'message assistant';
         div.style.animation = 'none'; // Pause animation initially
-        
+
         div.innerHTML = `<div class="message-avatar">🧬</div><div class="message-content">${formatText(text)}</div>`;
         msgs.appendChild(div);
-        
+
         // Trigger reflow to restart animation smoothly
         void div.offsetWidth;
         div.style.animation = '';
-        
+
         scrollToBottom();
     }
 
@@ -1051,7 +1070,7 @@ Do not output raw compressed text. Always format beautifully and respond in Port
         const div = document.createElement('div');
         div.className = 'message assistant';
         div.style.animation = 'none'; // Pause animation initially
-        
+
         let html = '<div class="message-avatar">🧬</div><div class="message-content">';
         switch (data.type) {
             case 'quiz': html += renderQuiz(data); break;
@@ -1061,15 +1080,15 @@ Do not output raw compressed text. Always format beautifully and respond in Port
         html += '</div>';
         div.innerHTML = html;
         msgs.appendChild(div);
-        
+
         if (data.type === 'quiz') initQuizInteraction(div, data);
         if (data.type === 'flashcards') initFlashcardInteraction(div, data);
         if (data.type === 'case_study') initCaseInteraction(div);
-        
+
         // Trigger reflow to restart animation smoothly
         void div.offsetWidth;
         div.style.animation = '';
-        
+
         scrollToBottom();
     }
 
@@ -1187,7 +1206,7 @@ Do not output raw compressed text. Always format beautifully and respond in Port
         if (typeof marked !== 'undefined') {
             return marked.parse(cleanedText, { breaks: true, gfm: true });
         }
-        
+
         // Fallback
         return '<p>' + cleanedText.replace(/\n/g, '<br>') + '</p>';
     }
@@ -1201,7 +1220,7 @@ Do not output raw compressed text. Always format beautifully and respond in Port
         document.getElementById('set-save-btn').addEventListener('click', () => { saveSettings(); showStatus('set-status', '✅ Configurações salvas!', 'success'); checkHealth(); });
         document.getElementById('set-test-btn').addEventListener('click', async () => {
             saveSettings(); showStatus('set-status', '🔄 Testando conexão...', 'success');
-            try { const response = await sendToMedGemma([{ role: 'user', content: 'Diga "MedGemma conectado com sucesso!" exatamente com essas palavras.' }], 50, 0.1); showStatus('set-status', '✅ ' + response.substring(0, 100), 'success'); checkHealth(); }
+            try { const response = await sendToMedGemini([{ role: 'user', content: 'Diga "MedGemini conectado com sucesso!" exatamente com essas palavras.' }], 50, 0.1); showStatus('set-status', '✅ ' + response.substring(0, 100), 'success'); checkHealth(); }
             catch (e) { showStatus('set-status', '❌ ' + e.message, 'error'); }
         });
         document.getElementById('set-temperature').addEventListener('input', (e) => { document.getElementById('temp-value').textContent = e.target.value; });
@@ -1213,7 +1232,7 @@ Do not output raw compressed text. Always format beautifully and respond in Port
     // TEMAS — Sistema de Cores
     // ============================================================
     function initTheme() {
-        const saved = localStorage.getItem('medgemma-theme') || 'gemini-dark';
+        const saved = localStorage.getItem('MedGemini-theme') || 'gemini-dark';
         applyTheme(saved);
 
         document.getElementById('theme-picker')?.addEventListener('click', (e) => {
@@ -1221,7 +1240,7 @@ Do not output raw compressed text. Always format beautifully and respond in Port
             if (!dot) return;
             const theme = dot.dataset.theme;
             applyTheme(theme);
-            localStorage.setItem('medgemma-theme', theme);
+            localStorage.setItem('MedGemini-theme', theme);
         });
     }
 

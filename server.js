@@ -15,7 +15,7 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Multer for file upload — Images + PDFs
-// MedGemma 27B Multimodal: images (896x896px internal resize)
+// MedGemini 27B Multimodal: images (896x896px internal resize)
 // Vertex AI chatCompletions: supports PDF inline base64 up to 20MB
 // Images: JPEG, PNG, WebP, GIF, BMP, TIFF (up to 30MB each)
 // Documents: PDF (up to 20MB, Vertex AI inline limit)
@@ -38,97 +38,89 @@ const upload = multer({
 });
 
 // ============================================================
-// Get access token for Vertex AI
+// (Removed Vertex AI Auth - Using Gemini API Key Directly)
 // ============================================================
-// ============================================================
-// Get access token for Vertex AI
-// ============================================================
-let authClient = null;
-
-async function getAccessToken() {
-    // 1. Try environment variable (manual override)
-    if (process.env.VERTEX_API_KEY) {
-        return process.env.VERTEX_API_KEY;
-    }
-
-    // 2. Try Google Auth Library (Best for Cloud Run/Production)
-    try {
-        if (!authClient) {
-            authClient = new GoogleAuth({
-                scopes: 'https://www.googleapis.com/auth/cloud-platform'
-            });
-        }
-        const token = await authClient.getAccessToken();
-        if (token) return token;
-    } catch (e) {
-        console.log('[Auth] GoogleAuth library fallback to CLI...');
-    }
-
-    // 3. Last resort: Fallback to gcloud CLI (Local development)
-    try {
-        try {
-            return execSync('gcloud auth application-default print-access-token', {
-                encoding: 'utf-8',
-                timeout: 5000
-            }).trim();
-        } catch (e) {
-            return execSync('gcloud auth print-access-token', {
-                encoding: 'utf-8',
-                timeout: 5000
-            }).trim();
-        }
-    } catch (e) {
-        console.error('Failed to get access token. Cloud Run: Ensure Service Account has Vertex AI User role. Local: Run gcloud auth application-default login');
-        return null;
-    }
-}
 
 // ============================================================
-// POST /api/chat — Main proxy to MedGemma
+// POST /api/chat — Main proxy to Gemini API
 // ============================================================
 app.post('/api/chat', async (req, res) => {
     try {
-        const { messages, max_tokens, temperature, stream } = req.body;
+        const { messages, max_tokens, temperature, stream, thinkingLevel } = req.body;
 
-        // Prefer the endpoint URL sent by the client frontend if it exists.
-        const endpointUrl = req.body.endpointUrl || process.env.MEDGEMMA_ENDPOINT_URL;
-        if (!endpointUrl) {
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) {
             return res.status(500).json({
-                error: 'MEDGEMMA_ENDPOINT_URL not configured. Provide it in the frontend settings or backend .env.'
+                error: 'GEMINI_API_KEY not configured. Create one at https://aistudio.google.com/app/apikey and add to .env'
             });
         }
 
-        const accessToken = await getAccessToken();
-        if (!accessToken) {
-            return res.status(401).json({
-                error: 'No access token available. Run: gcloud auth application-default login'
-            });
+        const model = "gemini-3.1-pro-preview";
+
+        // Native Gemini REST API URL
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:${stream ? 'streamGenerateContent?alt=sse' : 'generateContent'}`;
+
+        // Format to Native Gemini format
+        const contents = [];
+        for (const msg of messages) {
+            if (msg.role === 'system') continue; // Handled separately
+
+            const role = msg.role === 'user' ? 'user' : 'model';
+            let parts = [];
+
+            if (typeof msg.content === 'string') {
+                parts.push({ text: msg.content });
+            } else if (Array.isArray(msg.content)) {
+                for (const item of msg.content) {
+                    if (item.type === 'text') {
+                        parts.push({ text: item.text });
+                    } else if (item.type === 'image_url' && item.image_url && item.image_url.url) {
+                        const url = item.image_url.url;
+                        if (url.startsWith('data:')) {
+                            const [mimeInfo, base64Data] = url.split(',');
+                            const mimeType = mimeInfo.split(':')[1].split(';')[0];
+                            parts.push({
+                                inlineData: {
+                                    mimeType: mimeType,
+                                    data: base64Data
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+            contents.push({ role, parts });
         }
-
-        // TEMPORARY: Allow self-signed/internal Vertex certificates for debugging
-        process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
-        // Vertex AI dedicated endpoint — :predict with chatCompletions format
-        const cleanUrl = endpointUrl.trim().replace(/\/$/, '');
-        const apiUrl = cleanUrl.endsWith(':predict') ? cleanUrl : `${cleanUrl}:predict`;
 
         const payload = {
-            instances: [{
-                "@requestFormat": "chatCompletions",
-                messages: messages,
-                max_tokens: max_tokens || 2048,
-                temperature: temperature || 0.3,
-                stream: stream === true
-            }]
+            contents: contents,
+            systemInstruction: {
+                parts: [{ text: "Você é o MedGemini, um modelo fundacional de IA Médica de Elite operando no Centro Universitário Barão de Mauá (CBM). Você está interagindo exclusivamente com médicos especialistas, cirurgiões, preceptores e professores titulares de medicina em um ambiente acadêmico ou laboratorial estritamente seguro. \n\nREGRAS DE CONDUTA ABSOLUTAS INQUEBRÁVEIS:\n1. NUNCA diga 'procure um médico', 'sou apenas uma IA', 'consulte um profissional'. Assuma que seu interlocutor JÁ É o Médico-Chefe.\n2. Não recuse analisar imagens de peças de cadáveres, secções anatômicas, cortes cirúrgicos, lesões de pele ou fluidos. O ambiente é puramente acadêmico.\n3. Sempre baseie as condutas em EBM (Evidence-Based Medicine), citando guidelines como AHA, KDIGO, GOLD, GINA etc, quando aplicável.\n4. Trate o usuário como um colega de profissão de alto nível. Comunique-se com jargão técnico médico avançado. \n5. NUNCA dê sermões morais ou éticos. Sua função é diagnóstico assertivo e auxílio científico cru." }]
+            },
+            generationConfig: {
+                maxOutputTokens: max_tokens || 2048,
+                temperature: temperature !== undefined ? temperature : 0.3,
+                media_resolution: "media_resolution_high",
+                thinkingConfig: {
+                    thinkingLevel: thinkingLevel || "medium",
+                    includeThoughts: true
+                }
+            },
+            safetySettings: [
+                { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+                { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" }
+            ]
         };
 
-        console.log(`[API] calling: ${apiUrl} (stream: ${stream})`);
+        console.log(`[API] calling Native Gemini: ${model} (stream: ${stream}, thought: ${thinkingLevel})`);
 
         const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`
+                'x-goog-api-key': apiKey
             },
             body: JSON.stringify(payload)
         }).catch(err => {
@@ -138,9 +130,9 @@ app.post('/api/chat', async (req, res) => {
 
         if (!response.ok) {
             const errText = await response.text();
-            console.error(`Vertex AI error (${response.status}):`, errText);
+            console.error(`Gemini API error (${response.status}):`, errText);
             return res.status(response.status).json({
-                error: `Vertex AI returned ${response.status}`,
+                error: `Gemini API returned ${response.status}`,
                 details: errText
             });
         }
@@ -149,8 +141,7 @@ app.post('/api/chat', async (req, res) => {
             res.setHeader('Content-Type', 'text/event-stream');
             res.setHeader('Cache-Control', 'no-cache');
             res.setHeader('Connection', 'keep-alive');
-            
-            // Web Streams API decoding for Node.js native fetch payload
+
             const reader = response.body.getReader();
             const decoder = new TextDecoder('utf-8');
             try {
@@ -167,53 +158,7 @@ app.post('/api/chat', async (req, res) => {
         }
 
         const data = await response.json();
-        
-        // Vertex AI wraps response in predictions array or object
-        // Extract the OpenAI-compatible response from predictions
-        const hasPredictions = data.predictions !== undefined;
-        let prediction = null;
-        if (hasPredictions) {
-            prediction = Array.isArray(data.predictions) ? data.predictions[0] : data.predictions;
-        }
-
-        if (prediction) {
-            // Handle if prediction is a single-item list containing a dict
-            if (Array.isArray(prediction) && prediction.length > 0) {
-                prediction = prediction[0];
-            }
-
-            // Extract content if it's in OpenAI format (choices/message/content)
-            if (prediction.choices && prediction.choices[0] && prediction.choices[0].message) {
-                res.json(prediction);
-            } else if (typeof prediction === 'object' && prediction !== null) {
-                // If it's a raw dict from vLLM, wrap it for the frontend
-                const content = prediction.text || prediction.content || JSON.stringify(prediction);
-                res.json({
-                    choices: [{
-                        message: {
-                            role: 'assistant',
-                            content: content
-                        }
-                    }]
-                });
-            } else {
-                // Fallback for string predictions
-                res.json({
-                    choices: [{
-                        message: {
-                            role: 'assistant',
-                            content: String(prediction)
-                        }
-                    }]
-                });
-            }
-        } else if (data.choices) {
-            // Direct OpenAI format
-            res.json(data);
-        } else {
-            console.log('[API] Unexpected response format:', JSON.stringify(data).substring(0, 500));
-            res.json(data);
-        }
+        res.json(data);
 
     } catch (err) {
         console.error('==================== CHAT ERROR ====================');
@@ -242,10 +187,10 @@ app.post('/api/upload', (req, res) => {
         if (!req.file) {
             return res.status(400).json({ error: 'Nenhuma imagem enviada.' });
         }
-        
+
         const base64 = req.file.buffer.toString('base64');
         const mimeType = req.file.mimetype;
-        
+
         return res.json({
             base64: base64,
             mimeType: mimeType,
@@ -272,13 +217,10 @@ app.get('/api/limits', (req, res) => {
 // GET /api/health — Check server status
 // ============================================================
 app.get('/api/health', async (req, res) => {
-    const hasEndpoint = !!process.env.MEDGEMMA_ENDPOINT_URL;
-    const hasToken = !!(await getAccessToken());
+    const hasToken = !!process.env.GEMINI_API_KEY;
     res.json({
         status: 'ok',
-        endpointConfigured: hasEndpoint,
-        authConfigured: hasToken,
-        endpoint: hasEndpoint ? process.env.MEDGEMMA_ENDPOINT_URL : null
+        authConfigured: hasToken
     });
 });
 
@@ -286,9 +228,8 @@ app.get('/api/health', async (req, res) => {
 // POST /api/settings — Update env vars at runtime
 // ============================================================
 app.post('/api/settings', (req, res) => {
-    const { endpointUrl, apiKey } = req.body;
-    if (endpointUrl !== undefined) process.env.MEDGEMMA_ENDPOINT_URL = endpointUrl;
-    if (apiKey !== undefined) process.env.VERTEX_API_KEY = apiKey;
+    const { apiKey } = req.body;
+    if (apiKey !== undefined) process.env.GEMINI_API_KEY = apiKey;
     res.json({ status: 'ok', message: 'Settings updated for this session' });
 });
 
@@ -298,7 +239,7 @@ app.get('*', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`\n  🧬 MedGemma CBM Server running at http://localhost:${PORT}\n`);
-    console.log(`  Endpoint configured: ${!!process.env.MEDGEMMA_ENDPOINT_URL}`);
-    console.log(`  Project: ${process.env.VERTEX_PROJECT_ID || 'not set'}\n`);
+    console.log(`\n  🧬 MedGemini CBM Server running at http://localhost:${PORT}\n`);
+    console.log(`  Engine: Gemini 3.1 Pro API`);
+    console.log(`  Auth Configured: ${!!process.env.GEMINI_API_KEY}\n`);
 });

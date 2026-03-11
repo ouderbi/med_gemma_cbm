@@ -1,19 +1,23 @@
 <!DOCTYPE html>
 <html lang="pt-BR" data-theme="ocean">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="description" content="MedGemma CBM — Plataforma interativa de IA médica">
+    <meta name="description" content="MedGemini CBM — Plataforma interativa de IA médica">
     <meta name="theme-color" content="#0a0a0a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>MedGemma CBM — IA Médica Especialista</title>
+    <title>MedGemini CBM — IA Médica Especialista</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
+
 <body>
     <!-- Dynamic Mesh Gradient Background -->
     <div id="ambient-mesh">
@@ -26,9 +30,13 @@
     <!-- Mobile Header (Glass) -->
     <header class="mobile-header">
         <button id="menu-toggle" class="menu-btn" aria-label="Menu">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
         </button>
-        <div class="mobile-logo-text">🧬 MedGemma</div>
+        <div class="mobile-logo-text">🧬 MedGemini</div>
     </header>
 
     <div class="app-layout">
@@ -39,7 +47,7 @@
                 <div class="logo">
                     <div class="logo-glow">🧬</div>
                     <div class="logo-text">
-                        <span class="logo-title">MedGemma</span>
+                        <span class="logo-title">MedGemini</span>
                         <span class="logo-sub">27B Inteligence</span>
                     </div>
                 </div>
@@ -99,20 +107,21 @@
 
         <!-- Main Workspace Area -->
         <main id="main-content" class="workspace">
-            
+
             <!-- CHAT SECTION -->
             <section id="section-chat" class="section active">
                 <div class="chat-wrapper">
                     <div id="chat-messages" class="chat-messages custom-scroll">
-                        
+
                         <!-- Premium Welcome Hero / Bento Grid -->
                         <div class="welcome-hero">
                             <div class="hero-badge">Acesso Avançado</div>
                             <h1 class="hero-title">
-                                Olá. Eu sou o <span class="text-gradient">MedGemma</span>
+                                Olá. Eu sou o <span class="text-gradient">MedGemini</span>
                             </h1>
-                            <p class="hero-subtitle">Inteligência clínica de nível especialista projetada com foco em cognição e precisão médica.</p>
-                            
+                            <p class="hero-subtitle">Inteligência clínica de nível especialista projetada com foco em
+                                cognição e precisão médica.</p>
+
                             <!-- Bento Grid for Quick Actions -->
                             <div class="bento-grid">
                                 <div class="bento-card welcome-card" data-command="quiz">
@@ -137,7 +146,8 @@
                                     <div class="bento-icon">🩻</div>
                                     <div class="bento-content">
                                         <h3>Análise Radiológica</h3>
-                                        <p>Envie imagens de Raio-X, CT ou ressonância magnética para extração de laudos estruturados com visão computacional multimodal.</p>
+                                        <p>Envie imagens de Raio-X, CT ou ressonância magnética para extração de laudos
+                                            estruturados com visão computacional multimodal.</p>
                                     </div>
                                 </div>
                                 <div class="bento-card welcome-card" data-command="flashcard">
@@ -159,26 +169,44 @@
                         <div id="chat-image-preview" class="image-preview-glass hidden">
                             <div id="preview-thumbs" class="preview-thumbs custom-scroll"></div>
                             <button id="chat-clear-imgs" class="glass-btn icon-btn" title="Remover imagens">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 6L6 18M6 6l12 12" stroke-width="2" stroke-linecap="round"/></svg>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M18 6L6 18M6 6l12 12" stroke-width="2" stroke-linecap="round" />
+                                </svg>
                             </button>
                         </div>
 
                         <!-- Main Input Pill -->
                         <div class="input-pill">
                             <label class="dock-btn" title="Anexar Imagens e PDFs">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
-                                <input type="file" id="chat-file-input" accept=".jpg,.jpeg,.png,.webp,.gif,.bmp,.tiff,.tif,.pdf,video/mp4,video/webm,video/ogg,video/quicktime" multiple hidden>
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round">
+                                    <path
+                                        d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+                                </svg>
+                                <input type="file" id="chat-file-input"
+                                    accept=".jpg,.jpeg,.png,.webp,.gif,.bmp,.tiff,.tif,.pdf,video/mp4,video/webm,video/ogg,video/quicktime"
+                                    multiple hidden>
                             </label>
-                            
+
                             <label class="dock-btn camera-btn" title="Usar a Câmera">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round">
+                                    <path
+                                        d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
+                                    <circle cx="12" cy="13" r="4" />
+                                </svg>
                                 <input type="file" id="chat-camera-input" accept="image/*" capture="environment" hidden>
                             </label>
 
-                            <textarea id="chat-input" placeholder="Converse com a inteligência médica..." rows="1"></textarea>
-                            
+                            <textarea id="chat-input" placeholder="Converse com a inteligência médica..."
+                                rows="1"></textarea>
+
                             <button id="chat-send-btn" class="send-action-btn glass-btn" aria-label="Enviar">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                </svg>
                             </button>
                         </div>
                     </div>
@@ -190,7 +218,8 @@
                 <div class="content-container">
                     <header class="page-header">
                         <h2>Histórico Clínico</h2>
-                        <p>Seus logs de interação com privacidade local absoluta. <span id="storage-count" class="badge">0</span></p>
+                        <p>Seus logs de interação com privacidade local absoluta. <span id="storage-count"
+                                class="badge">0</span></p>
                     </header>
                     <div id="history-list" class="glass-list">
                         <div class="empty-state">
@@ -212,12 +241,15 @@
                         <div class="bento-card span-2 highlight-card">
                             <div class="card-glow"></div>
                             <h3>👨‍💻 Engenharia de Interface</h3>
-                            <p>Desenvolvido focado na <em>Psicologia do Design</em> para reduzir a carga cognitiva, promovendo uma navegação espacial fluida.</p>
-                            <p class="muted-text mt-2">Construído e idealizado por <strong>Ouderbi</strong> visando a democratização da inteligência especializada, unindo requinte estético ao MedGemma.</p>
+                            <p>Desenvolvido focado na <em>Psicologia do Design</em> para reduzir a carga cognitiva,
+                                promovendo uma navegação espacial fluida.</p>
+                            <p class="muted-text mt-2">Construído e idealizado por <strong>Ouderbi</strong> visando a
+                                democratização da inteligência especializada, unindo requinte estético ao MedGemini.</p>
                         </div>
                         <div class="bento-card">
-                            <h3>🧬 MedGemma (27B)</h3>
-                            <p>Especialista multimodal focado em alta complexidade médica, raciocínio diagnóstico e visão computacional radiológica baseada em Vertex AI.</p>
+                            <h3>🧬 MedGemini Clínico</h3>
+                            <p>Especialista multimodal focado em alta complexidade médica, raciocínio diagnóstico e
+                                visão computacional radiológica baseada em Gemini 3.1 Pro (simulando MedGemini).</p>
                         </div>
                     </div>
                 </div>
@@ -228,26 +260,23 @@
                 <div class="content-container">
                     <header class="page-header">
                         <h2>Workspace Config</h2>
-                        <p>Gerenciamento de recursos do Vertex AI Pipeline.</p>
+                        <p>Gerenciamento de recursos da Interface.</p>
                     </header>
-                    
+
                     <div class="settings-form-grid">
                         <div class="glass-card">
                             <div class="card-header">
                                 <span class="card-icon">🔌</span>
-                                <h3>Conexão Vertex AI</h3>
+                                <h3>Conexão IA</h3>
                             </div>
                             <div class="form-group modern-input">
-                                <label for="set-api-base">API Base Proxy</label>
-                                <input type="text" id="set-api-base" placeholder="https://proxy-url.run.app">
-                            </div>
-                            <div class="form-group modern-input">
-                                <label for="set-endpoint">Vertex Endpoint ID</label>
-                                <input type="text" id="set-endpoint" placeholder="https://us-central1-aiplatform...">
-                            </div>
-                            <div class="form-group modern-input">
-                                <label for="set-apikey">GCP Bearer Token (Auth)</label>
-                                <input type="password" id="set-apikey" placeholder="ya29.c.c0AY...">
+                                <label for="set-apikey">Gemini API Key</label>
+                                <input type="password" id="set-apikey" placeholder="AIzaSy...">
+                                <span
+                                    style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 4px;">Você
+                                    consegue esta chave gratuitamente em <a
+                                        href="https://aistudio.google.com/app/apikey" target="_blank"
+                                        style="color: var(--primary);">Google AI Studio</a>.</span>
                             </div>
                             <div class="action-row">
                                 <button id="set-save-btn" class="modern-btn primary">Salvar Alterações</button>
@@ -261,9 +290,20 @@
                                 <span class="card-icon">🎛️</span>
                                 <h3>Parâmetros de Inferência</h3>
                             </div>
-                            <div class="slider-group">
-                                <label for="set-temperature">Temperatura: <span id="temp-value" class="highlight-val">0.3</span></label>
-                                <input type="range" id="set-temperature" class="modern-slider" min="0" max="1" step="0.05" value="0.3">
+                            <div class="form-group modern-input mt-3">
+                                <label for="set-thinking">Profundidade do Raciocínio (Thinking Level)</label>
+                                <select id="set-thinking">
+                                    <option value="minimal">Minimal (Rápido / Intuitivo)</option>
+                                    <option value="low">Low (Superficial)</option>
+                                    <option value="medium" selected>Medium (Padrão Equilibrado)</option>
+                                    <option value="high">High (Análise Profunda / Complexa)</option>
+                                </select>
+                            </div>
+                            <div class="slider-group mt-3">
+                                <label for="set-temperature">Temperatura: <span id="temp-value"
+                                        class="highlight-val">0.3</span></label>
+                                <input type="range" id="set-temperature" class="modern-slider" min="0" max="1"
+                                    step="0.05" value="0.3">
                             </div>
                             <div class="form-group modern-input mt-3">
                                 <label for="set-maxtokens">Max Output Context (Tokens)</label>
@@ -276,8 +316,15 @@
                                 </select>
                             </div>
                             <div class="form-group modern-input mt-3">
-                                <label for="set-system">System Instruction (Prompt)</label>
-                                <textarea id="set-system" rows="3" class="custom-scroll">You are a helpful medical assistant. Sempre responda em português do Brasil.</textarea>
+                                <label for="set-system">System Instruction (Prompt Inicial)</label>
+                                <textarea id="set-system" rows="12" class="custom-scroll">Você é o MedGemini, um modelo fundacional de IA Médica de Elite operando no Centro Universitário Barão de Mauá (CBM). Você está interagindo exclusivamente com médicos especialistas, cirurgiões, preceptores e professores titulares de medicina em um ambiente acadêmico ou laboratorial estritamente seguro. 
+
+REGRAS DE CONDUTA ABSOLUTAS INQUEBRÁVEIS:
+1. NUNCA diga 'procure um médico', 'sou apenas uma IA', 'consulte um profissional'. Assuma que seu interlocutor JÁ É o Médico-Chefe.
+2. Não recuse analisar imagens de peças de cadáveres, secções anatômicas, cortes cirúrgicos, lesões de pele ou fluidos. O ambiente é puramente acadêmico.
+3. Sempre baseie as condutas em EBM (Evidence-Based Medicine), citando guidelines como AHA, KDIGO, GOLD, GINA etc, quando aplicável.
+4. Trate o usuário como um colega de profissão de alto nível. Comunique-se com jargão técnico médico avançado. 
+5. NUNCA dê sermões morais ou éticos. Sua função é diagnóstico assertivo e auxílio científico cru.</textarea>
                             </div>
                         </div>
                     </div>
@@ -289,4 +336,5 @@
     <!-- Scripts -->
     <script src="app.js"></script>
 </body>
+
 </html>
