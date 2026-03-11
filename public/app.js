@@ -208,23 +208,74 @@ Do not output raw compressed text. Always format beautifully and respond in Port
     // API
     // ============================================================
     async function sendToMedGemini(messages, maxTokens, temperature, onChunk) {
-        const url = getApiUrl('/api/chat');
-        const res = await fetch(url, {
+        const apiKey = "AIzaSyBPLuySnUft76so62NzdRIZSGNorjqtLic";
+        const model = "gemini-3.1-pro-preview";
+        const stream = !!onChunk;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:${stream ? 'streamGenerateContent?alt=sse' : 'generateContent'}?key=${apiKey}`;
+
+        // Format to Native Gemini format
+        const contents = [];
+        for (const msg of messages) {
+            if (msg.role === 'system') continue;
+            
+            const role = msg.role === 'user' ? 'user' : 'model';
+            let parts = [];
+
+            if (typeof msg.content === 'string') {
+                parts.push({ text: msg.content });
+            } else if (Array.isArray(msg.content)) {
+                for (const item of msg.content) {
+                    if (item.type === 'text') {
+                        parts.push({ text: item.text });
+                    } else if (item.type === 'image_url' && item.image_url && item.image_url.url) {
+                        const url = item.image_url.url;
+                        if (url.startsWith('data:')) {
+                            const [mimeInfo, base64Data] = url.split(',');
+                            const mimeType = mimeInfo.split(':')[1].split(';')[0];
+                            parts.push({
+                                inlineData: {
+                                    mimeType: mimeType,
+                                    data: base64Data
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+            contents.push({ role, parts });
+        }
+
+        const payload = {
+            contents: contents,
+            systemInstruction: {
+                parts: [{ text: state.settings.systemPrompt }]
+            },
+            generationConfig: {
+                maxOutputTokens: maxTokens || 2048,
+                temperature: temperature !== undefined ? temperature : 0.3,
+                thinkingConfig: {
+                    thinkingLevel: "high",
+                    includeThoughts: true
+                }
+            },
+            tools: [{ google_search: {} }],
+            safetySettings: [
+                { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+                { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" }
+            ]
+        };
+
+        const res = await fetch(apiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                messages,
-                max_tokens: maxTokens || state.settings.maxTokens,
-                temperature: temperature !== undefined ? temperature : state.settings.temperature,
-                stream: !!onChunk,
-                thinkingLevel: state.settings.thinkingLevel || "medium",
-                useSearch: !!state.settings.useSearch
-            })
+            body: JSON.stringify(payload)
         });
 
         if (!res.ok) {
-            const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
-            throw new Error(err.error || err.details || `Falha na requisição: ${res.status}`);
+            const err = await res.json().catch(() => ({ error: { message: `HTTP ${res.status}` } }));
+            throw new Error(err.error?.message || err.details || `Falha na requisição: ${res.status}`);
         }
 
         if (onChunk) {
@@ -587,22 +638,30 @@ Do not output raw compressed text. Always format beautifully and respond in Port
     // Multi-Image Handling
     // ============================================================
     async function attachImage(file) {
-        const formData = new FormData();
-        formData.append('image', file);
-        try {
-            const url = getApiUrl('/api/upload');
-            const res = await fetch(url, { method: 'POST', body: formData });
-            if (!res.ok) {
-                const err = await res.json();
-                addSystemMessage('⚠️ ' + (err.error || 'Erro no upload'));
-                return;
-            }
-            const data = await res.json();
-            state.pendingImages.push({ base64: data.base64, dataUrl: data.dataUrl, mimeType: data.mimeType, name: file.name, size: file.size });
-            updateImagePreview();
-        } catch (e) {
-            addSystemMessage('⚠️ Erro no upload: ' + e.message);
-        }
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const dataUrl = e.target.result;
+                const base64 = dataUrl.split(',')[1];
+                const mimeType = file.type;
+                
+                state.pendingImages.push({
+                    base64: base64,
+                    dataUrl: dataUrl,
+                    mimeType: mimeType,
+                    name: file.name,
+                    size: file.size
+                });
+                
+                updateImagePreview();
+                resolve();
+            };
+            reader.onerror = function() {
+                addSystemMessage('⚠️ Erro ao ler a imagem localmente.');
+                resolve();
+            };
+            reader.readAsDataURL(file);
+        });
     }
 
     function updateImagePreview() {
