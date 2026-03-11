@@ -147,7 +147,7 @@ REGRAS OBRIGATÓRIAS:
 [FORMAT] Responda APENAS com JSON válido neste formato exato (sem Markdown em volta do JSON):
 {"type":"quiz","title":"Título do Quiz","questions":[{"question":"Vinheta clínica detalhada e Pergunta?","options":["A) ...","B) ...","C) ...","D) ..."],"correct":0,"explanation":"Explicação FOCO: Descreva detalhadamente por que a correta é a correta, e EXPLIQUE CLARAMENTE POR QUE CADA UMA DAS OUTRAS ALTERNATIVAS ESTÁ INCORRETA."}]}
 correct = índice base-0. Responda em português do Brasil.`,
-            temperature: 0.5, maxTokens: 4096
+            temperature: 0.5, maxTokens: 8192
         },
         FLASHCARD: {
             patterns: [/flashcard/i, /flash.?card/i, /cart[oõ]es.*revis[aã]o/i, /gere.*flashcard/i, /cart[oõ]es.*estudo/i],
@@ -156,7 +156,7 @@ correct = índice base-0. Responda em português do Brasil.`,
 [FORMAT] Responda APENAS com JSON válido neste formato:
 {"type":"flashcards","title":"Título","cards":[{"front":"Pergunta/Conceito (Frente)","back":"Explicação/Resposta detalhada (Verso)"}]}
 Responda em português do Brasil.`,
-            temperature: 0.5, maxTokens: 4096
+            temperature: 0.5, maxTokens: 8192
         },
         CASE_STUDY: {
             patterns: [/caso.?cl[ií]nico/i, /estudo.*caso/i, /case.*study/i, /crie.*caso/i, /gere.*caso/i, /simul.*paciente/i],
@@ -166,7 +166,7 @@ Responda em português do Brasil.`,
 [FORMAT] Responda APENAS com JSON válido neste formato (sem bordas markdown):
 {"type":"case_study","title":"Título do Caso","sections":[{"heading":"Apresentação do Paciente / HMA / Exame Físico Inicial","content":"Conteúdo clínico detalhado. Finalize sempre perguntando: 'Qual é o seu diagnóstico diferencial preliminar e quais exames você solicitaria agora?'","spoiler":false}]}
 Use spoiler:true apenas para a resolução final do caso (Diagnóstico Definitivo e Tratamento Padrão-Ouro). Responda em português do Brasil.`,
-            temperature: 0.6, maxTokens: 4096
+            temperature: 0.6, maxTokens: 8192
         },
         RADIOLOGY: {
             patterns: [/an[aá]lis.*imagem/i, /raio.?x/i, /radiolog/i, /descrev.*imagem/i, /laudo/i, /xray/i, /tomografia/i, /resson[aâ]ncia/i, /histopatolog/i, /dermatolog/i, /oftalmolog/i, /fundoscop/i, /ct\b/i, /mri\b/i],
@@ -550,11 +550,11 @@ Use spoiler:true apenas para a resolução final do caso (Diagnóstico Definitiv
         switchSection('chat');
         const input = document.getElementById('chat-input');
         const prompts = {
-            quiz: `Gere um quiz interativo com 5 questões de múltipla escolha (A-D) sobre o tema que vou informar. Cada questão DEVE começar com uma vinheta clínica (Clinical Vignette) contendo: idade, sexo, queixa principal, HMA resumido, achados relevantes do exame físico e pelo menos 1 resultado laboratorial ou de imagem pertinente. Os distratores devem ser diagnósticos ou condutas plausíveis que um aluno poderia confundir. Na explicação, justifique a correta E explique por que cada alternativa errada está incorreta, citando a fisiopatologia envolvida.\n\nTema: `,
+            quiz: `Gere um quiz interativo com 3 questões de múltipla escolha (A-D) sobre o tema que vou informar. Cada questão DEVE começar com uma vinheta clínica (Clinical Vignette) contendo: idade, sexo, queixa principal, HMA resumido, achados relevantes do exame físico e pelo menos 1 resultado laboratorial ou de imagem pertinente. Os distratores devem ser diagnósticos ou condutas plausíveis que um aluno poderia confundir. Na explicação, justifique a correta E explique por que cada alternativa errada está incorreta, citando a fisiopatologia envolvida.\n\nTema: `,
 
             caso: `Crie um caso clínico completo e interativo no estilo PBL (Problem-Based Learning) sobre o tema que vou informar. O caso deve ter:\n1. IDENTIFICAÇÃO: Paciente fictício com nome, idade, sexo, profissão e procedência\n2. QUEIXA PRINCIPAL e HMA detalhados com timeline (duração, progressão, fatores de melhora/piora)\n3. ANTECEDENTES: Pessoais (comorbidades, medicações em uso), Familiares e Hábitos de vida\n4. EXAME FÍSICO: Sinais vitais completos + achados positivos E negativos pertinentes\n5. EXAMES COMPLEMENTARES iniciais (hemograma, bioquímica, imagem) com valores numéricos realistas\n6. Ao final, faça perguntas ao aluno: "Qual seu diagnóstico diferencial? Quais exames adicionais você solicitaria? Qual a conduta inicial?"\n7. Inclua a resolução final (diagnóstico definitivo + tratamento padrão-ouro com posologia) como seção oculta (spoiler)\n\nTema: `,
 
-            flashcard: `Gere 10 flashcards sobre o tema que vou informar. Cada flashcard deve ter:\n- FRENTE: Uma pergunta clínica aplicada (não apenas definição). Ex: "Paciente com HAS + DM + proteinúria: qual anti-hipertensivo de primeira escolha e por quê?"\n- VERSO: Resposta objetiva + explicação do mecanismo/fisiopatologia em 2-3 frases + referência à diretriz quando aplicável (AHA, KDIGO, GOLD, etc.)\nOs flashcards devem cobrir: fisiopatologia, diagnóstico, manejo terapêutico, farmacologia, e diagnósticos diferenciais do tema.\n\nTema: `,
+            flashcard: `Gere 6 flashcards sobre o tema que vou informar. Cada flashcard deve ter:\n- FRENTE: Uma pergunta clínica aplicada (não apenas definição). Ex: "Paciente com HAS + DM + proteinúria: qual anti-hipertensivo de primeira escolha e por quê?"\n- VERSO: Resposta objetiva + explicação do mecanismo/fisiopatologia em 2-3 frases + referência à diretriz quando aplicável (AHA, KDIGO, GOLD, etc.)\nOs flashcards devem cobrir: fisiopatologia, diagnóstico, manejo terapêutico, farmacologia, e diagnósticos diferenciais do tema.\n\nTema: `,
 
             radiologia: `Analise a imagem médica que vou anexar. Produza um laudo radiológico estruturado contendo:\n1. TÉCNICA: Tipo de exame, incidência/cortes, contraste\n2. ACHADOS SISTEMÁTICOS: Descreva todas as estruturas visíveis de forma organizada (ex: para tórax → partes moles, arcabouço ósseo, mediastino, parênquima, pleura)\n3. ACHADOS POSITIVOS: Anormalidades encontradas com localização anatômica precisa\n4. ACHADOS NEGATIVOS PERTINENTES: O que é normal mas importante relatar\n5. IMPRESSÃO DIAGNÓSTICA: Diagnóstico principal + diferenciais\n6. RECOMENDAÇÃO: Próximos passos (exames adicionais, correlação clínica)\n\nAnexe a imagem e descreva brevemente: `,
 
