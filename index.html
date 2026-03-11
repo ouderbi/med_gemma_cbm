@@ -4,11 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="description" content="MedGemini CBM — Plataforma interativa de IA médica">
+    <meta name="description" content="MedGemini — Assistente de IA médica com raciocínio clínico avançado, quizzes, casos clínicos e análise radiológica.">
     <meta name="theme-color" content="#0a0a0a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>MedGemini CBM — IA Médica Especialista</title>
+    <title>MedGemini — Assistente Médico com IA</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -48,7 +48,7 @@
                     <div class="logo-glow">🧬</div>
                     <div class="logo-text">
                         <span class="logo-title">MedGemini</span>
-                        <span class="logo-sub">27B Inteligence</span>
+                        <span class="logo-sub">Assistente Médico IA</span>
                     </div>
                 </div>
             </div>
@@ -59,10 +59,10 @@
                 </button>
 
                 <div class="island-section">
-                    <span class="section-label">Portal Clínico</span>
+                    <span class="section-label">Navegação</span>
                     <ul class="nav-list">
                         <li class="nav-item active" data-section="chat">
-                            <span class="nav-icon">💬</span> Chat Médico
+                            <span class="nav-icon">💬</span> Chat
                         </li>
                         <li class="nav-item" data-section="history">
                             <span class="nav-icon">📜</span> Histórico
@@ -76,10 +76,10 @@
                 </div>
 
                 <div class="island-section">
-                    <span class="section-label">Sistema & Layout</span>
+                    <span class="section-label">Personalização</span>
                     <ul class="nav-list">
                         <li class="nav-item" data-section="about">
-                            <span class="nav-icon">💡</span> Sobre a Plataforma
+                            <span class="nav-icon">💡</span> Sobre
                         </li>
                     </ul>
                     <div class="theme-picker" id="theme-picker">
@@ -112,12 +112,11 @@
 
                         <!-- Premium Welcome Hero / Bento Grid -->
                         <div class="welcome-hero">
-                            <div class="hero-badge">Acesso Avançado</div>
+                            <div class="hero-badge">Gemini 3.1 Pro</div>
                             <h1 class="hero-title">
                                 Olá. Eu sou o <span class="text-gradient">MedGemini</span>
                             </h1>
-                            <p class="hero-subtitle">Inteligência clínica de nível especialista projetada com foco em
-                                cognição e precisão médica.</p>
+                            <p class="hero-subtitle">Seu assistente de raciocínio clínico com visão multimodal, busca em tempo real e geração de materiais didáticos.</p>
 
                             <!-- Bento Grid for Quick Actions -->
                             <div class="bento-grid">
@@ -126,7 +125,7 @@
                                     <div class="bento-icon">🧠</div>
                                     <div class="bento-content">
                                         <h3>Gerar Quiz</h3>
-                                        <p>Treine seus conhecimentos clínicos.</p>
+                                        <p>Questões de múltipla escolha com vinhetas clínicas.</p>
                                     </div>
                                 </div>
                                 <div class="bento-card welcome-card" data-command="caso">
@@ -134,7 +133,7 @@
                                     <div class="bento-icon">📋</div>
                                     <div class="bento-content">
                                         <h3>Estudo de Caso</h3>
-                                        <p>Simulações avançadas de pacientes.</p>
+                                        <p>Simulações interativas de pacientes com PBL.</p>
                                     </div>
                                 </div>
                                 <div class="bento-card welcome-card" data-command="radiologia">
@@ -142,7 +141,7 @@
                                     <div class="bento-icon">🩻</div>
                                     <div class="bento-content">
                                         <h3>Análise Radiológica</h3>
-                                        <p>Laudos estruturados com visão computacional multimodal.</p>
+                                        <p>Envie Raio-X, TC ou RM para laudos estruturados.</p>
                                     </div>
                                 </div>
                                 <div class="bento-card welcome-card" data-command="flashcard">
@@ -150,7 +149,7 @@
                                     <div class="bento-icon">🃏</div>
                                     <div class="bento-content">
                                         <h3>Flashcards</h3>
-                                        <p>Active Recall para retenção clínica.</p>
+                                        <p>Memorização ativa com perguntas e respostas.</p>
                                     </div>
                                 </div>
                                 <div class="bento-card welcome-card" data-command="prova">
@@ -179,7 +178,7 @@
                         <!-- Image Preview Overlay -->
                         <div id="chat-image-preview" class="image-preview-glass hidden">
                             <div id="preview-thumbs" class="preview-thumbs custom-scroll"></div>
-                            <button id="chat-clear-imgs" class="glass-btn icon-btn" title="Remover imagens">
+                            <button id="chat-clear-imgs" class="glass-btn icon-btn" title="Remover todos os anexos">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                     <path d="M18 6L6 18M6 6l12 12" stroke-width="2" stroke-linecap="round" />
                                 </svg>
@@ -188,18 +187,18 @@
 
                         <!-- Main Input Pill -->
                         <div class="input-pill">
-                            <label class="dock-btn" title="Anexar Imagens e PDFs">
+                            <label class="dock-btn" title="Anexar arquivos (imagens, PDFs ou vídeos)">
                                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="2" stroke-linecap="round">
                                     <path
                                         d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
                                 </svg>
                                 <input type="file" id="chat-file-input"
-                                    accept=".jpg,.jpeg,.png,.webp,.gif,.bmp,.tiff,.tif,.pdf,video/mp4,video/webm,video/ogg,video/quicktime"
+                                    accept=".jpg,.jpeg,.png,.webp,.pdf,video/mp4,video/webm,video/quicktime"
                                     multiple hidden>
                             </label>
 
-                            <label class="dock-btn camera-btn" title="Usar a Câmera">
+                            <label class="dock-btn camera-btn" title="Capturar foto com a câmera">
                                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="2" stroke-linecap="round">
                                     <path
@@ -229,13 +228,13 @@
                 <div class="content-container">
                     <header class="page-header">
                         <h2>Histórico Clínico</h2>
-                        <p>Seus logs de interação com privacidade local absoluta. <span id="storage-count"
+                        <p>Suas conversas salvas localmente neste navegador. <span id="storage-count"
                                 class="badge">0</span></p>
                     </header>
                     <div id="history-list" class="glass-list">
                         <div class="empty-state">
                             <span class="empty-icon">📂</span>
-                            <p>Nenhum log gravado no repositório seguro local.</p>
+                            <p>Nenhuma conversa salva ainda. Comece uma nova conversa e ela aparecerá aqui.</p>
                         </div>
                     </div>
                 </div>
@@ -246,21 +245,18 @@
                 <div class="content-container">
                     <header class="page-header">
                         <h2>Sobre a Interface</h2>
-                        <p>A arquitetura mental e digital por trás do projeto.</p>
+                        <p>Como este projeto foi construído.</p>
                     </header>
                     <div class="bento-grid about-grid">
                         <div class="bento-card span-2 highlight-card">
                             <div class="card-glow"></div>
                             <h3>👨‍💻 Engenharia de Interface</h3>
-                            <p>Desenvolvido focado na <em>Psicologia do Design</em> para reduzir a carga cognitiva,
-                                promovendo uma navegação espacial fluida.</p>
-                            <p class="muted-text mt-2">Construído e idealizado por <strong>Ouderbi</strong> visando a
-                                democratização da inteligência especializada, unindo requinte estético ao MedGemini.</p>
+                            <p>Desenvolvido com foco em <em>usabilidade médica</em>, reduzindo a carga cognitiva e promovendo uma navegação intuitiva.</p>
+                            <p class="muted-text mt-2">Criado por <strong>Ouderbi</strong>. Motor de IA: Gemini 3.1 Pro com raciocínio nativo, busca em tempo real e visão multimodal.</p>
                         </div>
                         <div class="bento-card">
-                            <h3>🧬 MedGemini Clínico</h3>
-                            <p>Especialista multimodal focado em alta complexidade médica, raciocínio diagnóstico e
-                                visão computacional radiológica baseada em Gemini 3.1 Pro (simulando MedGemini).</p>
+                            <h3>🧬 Capacidades</h3>
+                            <p>Chat médico socrático, quizzes interativos, casos clínicos PBL, flashcards, geração de provas (ENADE/Revalida), ferramentas docentes (planos de aula, OSCE, rubricas) e análise radiológica multimodal.</p>
                         </div>
                     </div>
                 </div>

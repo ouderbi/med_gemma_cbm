@@ -1,10 +1,11 @@
 /* ============================================================
-   MedGemini CBM — Chat-Centric Application Engine
+   MedGemini — Chat-Centric Medical AI Application
    
-   - Múltiplas imagens por mensagem
-   - Feedback contextual de processamento
+   - Múltiplas imagens e PDFs por mensagem
+   - Quizzes, Flashcards, Casos Clínicos e Provas
+   - Streaming de pensamento (Thinking) em tempo real
    - Persistência local via IndexedDB
-   - 🔒 100% local — nenhum dado é enviado para nuvem.
+   - Backend seguro via Cloud Run Proxy
    ============================================================ */
 
 (function () {
@@ -13,14 +14,14 @@
     // ============================================================
     // Constants
     // ============================================================
-    const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
-    const MAX_VIDEO_SIZE = 150 * 1024 * 1024; // 150MB para processamento local de vídeo
-    const MAX_IMAGES = 16; // Máximo de imagens/frames por mensagem
+    const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB (limite da API Gemini para inline data)
+    const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100MB para vídeos
+    const MAX_IMAGES = 10; // Máximo de arquivos por mensagem
     const ALLOWED_TYPES = [
-        'image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/bmp', 'image/tiff', 'application/pdf',
-        'video/mp4', 'video/webm', 'video/ogg', 'video/quicktime'
+        'image/jpeg', 'image/png', 'image/webp', 'application/pdf',
+        'video/mp4', 'video/webm', 'video/quicktime'
     ];
-    const ALLOWED_EXTS = '.jpg, .jpeg, .png, .webp, .gif, .bmp, .tiff, .pdf, .mp4, .webm, .ogg, .mov';
+    const ALLOWED_EXTS = '.jpg, .jpeg, .png, .webp, .pdf, .mp4, .webm, .mov';
     const DB_NAME = 'MedGeminiCBM';
     const DB_VERSION = 1;
 
@@ -453,7 +454,7 @@ Do not output raw compressed text. Always format beautifully and respond in Port
             const files = Array.from(e.target.files);
             for (const file of files) {
                 if (state.pendingImages.length >= MAX_IMAGES) {
-                    addSystemMessage(`⚠️ Máximo de arquivos (${MAX_IMAGES}) excedido.`);
+                    addSystemMessage('Maximo de ' + MAX_IMAGES + ' arquivos por mensagem.');
                     break;
                 }
                 const v = validateFile(file);
@@ -461,7 +462,7 @@ Do not output raw compressed text. Always format beautifully and respond in Port
                     if (file.type.startsWith('video/')) await processVideoFile(file);
                     else await attachImage(file);
                 } else {
-                    addSystemMessage('⚠️ ' + v.error);
+                    addSystemMessage('Arquivo nao suportado: ' + v.error);
                 }
             }
             e.target.value = '';
@@ -479,7 +480,7 @@ Do not output raw compressed text. Always format beautifully and respond in Port
             const files = Array.from(e.dataTransfer.files);
             for (const f of files) {
                 if (state.pendingImages.length >= MAX_IMAGES) {
-                    addSystemMessage(`⚠️ Máximo de arquivos (${MAX_IMAGES}) excedido.`);
+                    addSystemMessage('Maximo de ' + MAX_IMAGES + ' arquivos por mensagem.');
                     break;
                 }
                 const v = validateFile(f);
@@ -507,12 +508,12 @@ Do not output raw compressed text. Always format beautifully and respond in Port
                 const file = e.target.files[0];
                 if (!file) return;
                 if (state.pendingImages.length >= MAX_IMAGES) {
-                    addSystemMessage(`⚠️ Máximo de ${MAX_IMAGES} arquivos por mensagem.`);
+                    addSystemMessage('Maximo de ' + MAX_IMAGES + ' arquivos por mensagem.');
                     return;
                 }
                 const v = validateFile(file);
                 if (v.valid) await attachImage(file);
-                else addSystemMessage('⚠️ ' + v.error);
+                else addSystemMessage('Arquivo nao suportado: ' + v.error);
                 e.target.value = '';
             });
         }
@@ -538,7 +539,7 @@ Do not output raw compressed text. Always format beautifully and respond in Port
     // Edge Video Processing (Frame Extraction)
     // ============================================================
     async function processVideoFile(file) {
-        addSystemMessage(`⏳ Extraindo quadros do vídeo radiológico/clínico em segundo plano: ${file.name}...`);
+        addSystemMessage('Extraindo quadros do video: ' + file.name + '...');
         try {
             const frames = await extractVideoFrames(file, 8); // Extrair 8 frames representativos
             for (let i = 0; i < frames.length; i++) {
@@ -553,9 +554,9 @@ Do not output raw compressed text. Always format beautifully and respond in Port
                 }
             }
             updateImagePreview();
-            addSystemMessage(`✅ 8 quadros do vídeo foram extraídos. Eles serão analisados em sequência temporal pela Inteligência.`);
+            addSystemMessage(frames.length + ' quadros extraidos do video. Cada quadro sera analisado pela IA.');
         } catch (e) {
-            addSystemMessage(`⚠️ Erro ao processar vídeo: ${e.message}`);
+            addSystemMessage('Erro ao processar video: ' + e.message);
         }
     }
 
@@ -638,7 +639,7 @@ Do not output raw compressed text. Always format beautifully and respond in Port
                 resolve();
             };
             reader.onerror = function() {
-                addSystemMessage('⚠️ Erro ao ler a imagem localmente.');
+                addSystemMessage('Erro ao ler o arquivo.');
                 resolve();
             };
             reader.readAsDataURL(file);
@@ -746,7 +747,7 @@ Do not output raw compressed text. Always format beautifully and respond in Port
         const countEl = document.getElementById('storage-count');
         if (countEl) countEl.textContent = `${convs.length} conversa${convs.length !== 1 ? 's' : ''} salva${convs.length !== 1 ? 's' : ''}`;
         if (convs.length === 0) {
-            container.innerHTML = '<p class="empty-state">📭 Nenhuma conversa salva ainda. Suas conversas aparecerão aqui automaticamente.</p>';
+            container.innerHTML = '<p class="empty-state">Nenhuma conversa salva ainda.</p>';
             return;
         }
         container.innerHTML = '';
