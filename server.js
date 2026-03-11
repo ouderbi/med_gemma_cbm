@@ -46,7 +46,7 @@ const upload = multer({
 // ============================================================
 app.post('/api/chat', async (req, res) => {
     try {
-        const { messages, max_tokens, temperature, stream, thinkingLevel } = req.body;
+        const { messages, max_tokens, temperature, stream, thinkingLevel, useSearch } = req.body;
 
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) {
@@ -113,6 +113,15 @@ app.post('/api/chat', async (req, res) => {
                 { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" }
             ]
         };
+
+        // Inject Google Search Grounding tool if requested
+        if (useSearch) {
+            payload.tools = [
+                { googleSearch: {} } // The API expects googleSearch or google_search depending on version, docs say googleSearch in JS, but REST shows google_search. In raw REST, it's typically "google_search".
+            ];
+            // Fix based on actual Google REST docs for gemini-1.5/3.0
+            payload.tools = [{ google_search: {} }];
+        }
 
         console.log(`[API] calling Native Gemini: ${model} (stream: ${stream}, thought: ${thinkingLevel})`);
 
