@@ -355,53 +355,6 @@ Do not output raw compressed text. Always format beautifully and respond in Port
     }
 
     // ============================================================
-    // Settings
-    // ============================================================
-    function loadSettings() {
-        try {
-            const saved = localStorage.getItem('MedGemini-settings');
-            if (saved) Object.assign(state.settings, JSON.parse(saved));
-
-            document.getElementById('set-apikey').value = state.settings.apiKey || '';
-            document.getElementById('set-temperature').value = state.settings.temperature;
-            document.getElementById('set-maxtokens').value = state.settings.maxTokens;
-            document.getElementById('set-system').value = state.settings.systemPrompt;
-            if (state.settings.thinkingLevel) {
-                document.getElementById('set-thinking').value = state.settings.thinkingLevel;
-            }
-            if (state.settings.useSearch !== undefined) {
-                const searchEl = document.getElementById('set-use-search');
-                if (searchEl) searchEl.checked = state.settings.useSearch;
-            }
-            document.getElementById('temp-value').textContent = state.settings.temperature;
-        } catch (e) { }
-    }
-
-    function saveSettings() {
-        state.settings.apiKey = document.getElementById('set-apikey').value.trim();
-        state.settings.temperature = parseFloat(document.getElementById('set-temperature').value);
-        state.settings.maxTokens = parseInt(document.getElementById('set-maxtokens').value);
-        state.settings.systemPrompt = document.getElementById('set-system').value.trim();
-        state.settings.thinkingLevel = document.getElementById('set-thinking').value;
-        const searchEl = document.getElementById('set-use-search');
-        if (searchEl) {
-            state.settings.useSearch = searchEl.checked;
-        }
-
-        localStorage.setItem('MedGemini-settings', JSON.stringify(state.settings));
-
-        // Update server settings if connected
-        const url = getApiUrl('/api/settings');
-        fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                apiKey: state.settings.apiKey
-            })
-        }).catch(() => { });
-    }
-
-    // ============================================================
     // Navigation
     // ============================================================
     function initNavigation() {
@@ -456,29 +409,6 @@ Do not output raw compressed text. Always format beautifully and respond in Port
         const navItem = document.querySelector(`.nav-item[data-section="${name}"]`);
         if (navItem) navItem.classList.add('active');
         if (name === 'history') renderHistoryPage();
-    }
-
-    // ============================================================
-    // Health Check
-    // ============================================================
-    async function checkHealth() {
-        try {
-            const url = getApiUrl('/api/health');
-            const res = await fetch(url);
-            const data = await res.json();
-            const badge = document.getElementById('connection-status');
-            if (data.authConfigured) {
-                badge.className = 'connection-badge connected';
-                badge.querySelector('.status-text').textContent = 'Conectado';
-            } else {
-                badge.className = 'connection-badge disconnected';
-                badge.querySelector('.status-text').textContent = 'Sem Chave de API';
-            }
-        } catch (e) {
-            const badge = document.getElementById('connection-status');
-            badge.className = 'connection-badge disconnected';
-            badge.querySelector('.status-text').textContent = 'API Offline';
-        }
     }
 
     // ============================================================
@@ -1231,21 +1161,6 @@ Do not output raw compressed text. Always format beautifully and respond in Port
     function esc(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
 
     // ============================================================
-    // Settings
-    // ============================================================
-    function initSettings() {
-        document.getElementById('set-save-btn').addEventListener('click', () => { saveSettings(); showStatus('set-status', '✅ Configurações salvas!', 'success'); checkHealth(); });
-        document.getElementById('set-test-btn').addEventListener('click', async () => {
-            saveSettings(); showStatus('set-status', '🔄 Testando conexão...', 'success');
-            try { const response = await sendToMedGemini([{ role: 'user', content: 'Diga "MedGemini conectado com sucesso!" exatamente com essas palavras.' }], 50, 0.1); showStatus('set-status', '✅ ' + response.substring(0, 100), 'success'); checkHealth(); }
-            catch (e) { showStatus('set-status', '❌ ' + e.message, 'error'); }
-        });
-        document.getElementById('set-temperature').addEventListener('input', (e) => { document.getElementById('temp-value').textContent = e.target.value; });
-    }
-
-    function showStatus(id, msg, type) { const el = document.getElementById(id); el.textContent = msg; el.className = `set-status show ${type}`; setTimeout(() => el.className = 'set-status', 8000); }
-
-    // ============================================================
     // TEMAS — Sistema de Cores
     // ============================================================
     function initTheme() {
@@ -1280,13 +1195,9 @@ Do not output raw compressed text. Always format beautifully and respond in Port
     async function init() {
         try { state.db = await openDB(); } catch (e) { console.warn('IndexedDB não disponível:', e); }
         state.currentConvId = 'conv-' + Date.now();
-        loadSettings();
         initTheme();
         initNavigation();
         initChat();
-        initSettings();
-        checkHealth();
-        setInterval(checkHealth, 30000);
         if (state.db) await renderHistorySidebar();
     }
 
