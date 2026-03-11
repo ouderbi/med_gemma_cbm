@@ -519,6 +519,30 @@ Do not output raw compressed text. Always format beautifully and respond in Port
         }
     }
 
+    // ============================================================
+    // New Conversation Reset
+    // ============================================================
+    function startNewConversation() {
+        state.chatHistory = [];
+        state.pendingImages = [];
+        state.currentConvId = 'conv-' + Date.now();
+        const msgs = document.getElementById('chat-messages');
+        if (msgs) {
+            const hero = msgs.querySelector('.welcome-hero');
+            msgs.innerHTML = '';
+            if (hero) {
+                msgs.appendChild(hero);
+            } else {
+                location.reload();
+                return;
+            }
+        }
+        const input = document.getElementById('chat-input');
+        if (input) { input.value = ''; input.style.height = 'auto'; }
+        clearAllImages();
+        switchSection('chat');
+    }
+
     function handleQuickCommand(command) {
         switchSection('chat');
         const input = document.getElementById('chat-input');
@@ -846,78 +870,78 @@ Do not output raw compressed text. Always format beautifully and respond in Port
             const maxTokens = intentConfig ? intentConfig.maxTokens : state.settings.maxTokens;
             const temperature = intentConfig ? intentConfig.temperature : state.settings.temperature;
 
-            const isChat = intent === 'CHAT';
+            const isStructuredIntent = ['QUIZ', 'FLASHCARD', 'CASE_STUDY'].includes(intent);
             let finalResponseText = "";
 
-            if (isChat) {
-                // Real-time Streaming for Chat
-                const msgs = document.getElementById('chat-messages');
-                const streamDiv = document.createElement('div');
-                streamDiv.className = 'message assistant streaming';
-                streamDiv.innerHTML = `
-                    <div class="message-avatar">🧬</div>
-                    <div class="message-content">
-                        <div class="thought-container hidden">
-                            <div class="thought-header"><span class="thought-spinner">⚙️</span> Pensando...</div>
-                            <div class="thought-content"></div>
-                        </div>
-                        <div class="final-content"></div>
-                    </div>`;
+            // Streaming with Thoughts for ALL intents
+            const msgs = document.getElementById('chat-messages');
+            const streamDiv = document.createElement('div');
+            streamDiv.className = 'message assistant streaming';
+            streamDiv.innerHTML = `
+                <div class="message-avatar">🧬</div>
+                <div class="message-content">
+                    <div class="thought-container hidden">
+                        <div class="thought-header"><span class="thought-spinner">⚙️</span> Pensando...</div>
+                        <div class="thought-content"></div>
+                    </div>
+                    <div class="final-content"></div>
+                </div>`;
 
-                removeTyping(typingId);
-                msgs.appendChild(streamDiv);
+            removeTyping(typingId);
+            msgs.appendChild(streamDiv);
 
-                const finalContentNode = streamDiv.querySelector('.final-content');
-                const thoughtContainerNode = streamDiv.querySelector('.thought-container');
-                const thoughtContentNode = streamDiv.querySelector('.thought-content');
-                const thoughtHeaderNode = streamDiv.querySelector('.thought-header');
+            const finalContentNode = streamDiv.querySelector('.final-content');
+            const thoughtContainerNode = streamDiv.querySelector('.thought-container');
+            const thoughtContentNode = streamDiv.querySelector('.thought-content');
+            const thoughtHeaderNode = streamDiv.querySelector('.thought-header');
 
-                // Toggle Accordion Click
-                thoughtHeaderNode.addEventListener('click', () => {
-                    thoughtContainerNode.classList.toggle('expanded');
-                });
+            // Toggle Accordion Click
+            thoughtHeaderNode.addEventListener('click', () => {
+                thoughtContainerNode.classList.toggle('expanded');
+            });
 
-                // Native stream callback handles thought separation
-                finalResponseText = await sendToMedGemini(messages, maxTokens, temperature, (delta, fullText, displayHtml, thoughtHtml, groundingHtml) => {
-                    if (thoughtHtml) {
-                        thoughtContainerNode.classList.remove('hidden');
-                        thoughtContentNode.innerHTML = formatText(thoughtHtml);
-
-                        // If there is displayHtml, it means thoughts have finished and actual answer is streaming
-                        if (displayHtml) {
-                            thoughtContainerNode.classList.add('finished');
-                            thoughtContainerNode.classList.remove('expanded'); // Auto-collapse when done
-                            thoughtHeaderNode.innerHTML = `<span>🧠</span> Processo Estratégico Concluído (Ver Raciocínio)`;
-                        } else {
-                            // Auto-expand during streaming so user sees reasoning in real-time
-                            thoughtContainerNode.classList.remove('finished');
-                            thoughtContainerNode.classList.add('expanded');
-                            thoughtHeaderNode.innerHTML = `<span class="thought-spinner">⚙️</span> Raciocínio em Tempo Real...`;
-                        }
-                    } else {
-                        thoughtContainerNode.classList.add('hidden');
-                    }
+            // Native stream callback handles thought separation
+            finalResponseText = await sendToMedGemini(messages, maxTokens, temperature, (delta, fullText, displayHtml, thoughtHtml, groundingHtml) => {
+                if (thoughtHtml) {
+                    thoughtContainerNode.classList.remove('hidden');
+                    thoughtContentNode.innerHTML = formatText(thoughtHtml);
 
                     if (displayHtml) {
-                        finalContentNode.innerHTML = formatText(displayHtml) + (groundingHtml || '');
+                        thoughtContainerNode.classList.add('finished');
+                        thoughtContainerNode.classList.remove('expanded');
+                        thoughtHeaderNode.innerHTML = `<span>🧠</span> Processo Estratégico Concluído (Ver Raciocínio)`;
+                    } else {
+                        thoughtContainerNode.classList.remove('finished');
+                        thoughtContainerNode.classList.add('expanded');
+                        thoughtHeaderNode.innerHTML = `<span class="thought-spinner">⚙️</span> Raciocínio em Tempo Real...`;
                     }
-                    scrollToBottom();
-                });
-
-                streamDiv.classList.remove('streaming');
-
-                // Ensure thought block shows as finished after stream ends if it was used
-                if (finalResponseText && !finalResponseText.includes('<thought>') && thoughtContentNode.innerHTML) {
-                    thoughtContainerNode.classList.add('finished');
-                    thoughtHeaderNode.innerHTML = `<span>🧠</span> Processo Estratégico Concluído (Ver Raciocínio)`;
+                } else {
+                    thoughtContainerNode.classList.add('hidden');
                 }
-            } else {
-                // Structured Data (Quiz, Flashcards) - Wait for full response
-                finalResponseText = await sendToMedGemini(messages, maxTokens, temperature);
-                removeTyping(typingId);
+
+                if (displayHtml) {
+                    finalContentNode.innerHTML = formatText(displayHtml) + (groundingHtml || '');
+                }
+                scrollToBottom();
+            });
+
+            streamDiv.classList.remove('streaming');
+
+            // Ensure thought block shows as finished after stream ends
+            if (finalResponseText && thoughtContentNode.innerHTML) {
+                thoughtContainerNode.classList.add('finished');
+                thoughtContainerNode.classList.remove('expanded');
+                thoughtHeaderNode.innerHTML = `<span>🧠</span> Processo Estratégico Concluído (Ver Raciocínio)`;
+            }
+
+            // For structured intents (Quiz, Flashcards, Case Study), try parsing JSON and re-rendering
+            if (isStructuredIntent && finalResponseText) {
                 const structured = tryParseStructured(finalResponseText);
-                if (structured) renderStructuredMessage(structured);
-                else addAssistantMessage(finalResponseText);
+                if (structured) {
+                    // Replace streamed text with interactive widget
+                    streamDiv.remove();
+                    renderStructuredMessage(structured);
+                }
             }
 
             state.chatHistory.push({ role: 'assistant', content: finalResponseText });
