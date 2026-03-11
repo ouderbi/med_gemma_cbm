@@ -20,10 +20,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Images: JPEG, PNG, WebP, GIF, BMP, TIFF (up to 30MB each)
 // Documents: PDF (up to 20MB, Vertex AI inline limit)
 const ALLOWED_TYPES = [
-    'image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/bmp', 'image/tiff',
+    'image/jpeg', 'image/png', 'image/webp',
     'application/pdf'
 ];
-const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
+const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
 
 const upload = multer({
     storage: multer.memoryStorage(),
@@ -32,7 +32,7 @@ const upload = multer({
         if (ALLOWED_TYPES.includes(file.mimetype)) {
             cb(null, true);
         } else {
-            cb(new Error(`Tipo de arquivo não suportado: ${file.mimetype}. Use: JPG, PNG, WebP, GIF, BMP, TIFF ou PDF.`), false);
+            cb(new Error(`Tipo nao suportado: ${file.mimetype}. Use: JPG, PNG, WebP ou PDF.`), false);
         }
     }
 });
@@ -224,7 +224,7 @@ app.get('/api/limits', (req, res) => {
         maxFileSize: MAX_FILE_SIZE,
         maxFileSizeMB: MAX_FILE_SIZE / (1024 * 1024),
         allowedTypes: ALLOWED_TYPES,
-        allowedExtensions: ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp', '.tiff']
+        allowedExtensions: ['.jpg', '.jpeg', '.png', '.webp', '.pdf']
     });
 });
 
