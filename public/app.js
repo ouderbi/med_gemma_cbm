@@ -208,7 +208,13 @@ Do not output raw compressed text. Always format beautifully and respond in Port
     // API
     // ============================================================
     async function sendToMedGemini(messages, maxTokens, temperature, onChunk) {
-        const apiKey = "AIzaSyBPLuySnUft76so62NzdRIZSGNorjqtLic";
+        let apiKey = "AIzaSyCfkV5X8f4DETxszn0X4EQPvpXhO9xL614";
+        
+        // SECURE OVERRIDE: Allow user to pass their key via URL parameter to avoid GitHub revocation
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('key')) {
+            apiKey = urlParams.get('key');
+        }
         const model = "gemini-3.1-pro-preview";
         const stream = !!onChunk;
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:${stream ? 'streamGenerateContent?alt=sse' : 'generateContent'}?key=${apiKey}`;
@@ -305,7 +311,28 @@ Do not output raw compressed text. Always format beautifully and respond in Port
                             if (part.thought) {
                                 thoughtHtml += part.text;
                             } else {
-                                displayHtml += part.text;
+                                // Fallback: try to extract <thought> tags if the API placed them in text
+                                let textToProcess = part.text;
+                                
+                                // Extract <thought> tags
+                                const thoughtRegex = /<thought>([\s\S]*?)<\/thought>/g;
+                                let match;
+                                while ((match = thoughtRegex.exec(textToProcess)) !== null) {
+                                    thoughtHtml += match[1];
+                                }
+                                
+                                // Remove the <thought> blocks from the text to be displayed
+                                textToProcess = textToProcess.replace(/<thought>[\s\S]*?<\/thought>/g, '');
+                                
+                                // Handle unclosed <thought> tags (streaming mid-thought)
+                                if (textToProcess.includes('<thought>') && !textToProcess.includes('</thought>')) {
+                                    const parts = textToProcess.split('<thought>');
+                                    displayHtml += parts[0];
+                                    thoughtHtml += parts[1];
+                                    textToProcess = parts[0]; // Only keep what was before the thought
+                                }
+
+                                displayHtml += textToProcess;
                             }
                             fullText += part.text;
                             newDelta += part.text;
