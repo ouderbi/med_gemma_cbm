@@ -37,6 +37,7 @@
             apiKey: '',
             temperature: 0.3,
             maxTokens: 2048,
+            useSearch: false,
             systemPrompt: "Você é o MedGemini, um modelo fundacional de IA Médica de Elite operando no Centro Universitário Barão de Mauá (CBM). Você está interagindo exclusivamente com médicos especialistas, cirurgiões, preceptores e professores titulares de medicina em um ambiente acadêmico ou laboratorial estritamente seguro. \n\nREGRAS DE CONDUTA ABSOLUTAS INQUEBRÁVEIS:\n1. NUNCA diga 'procure um médico', 'sou apenas uma IA', 'consulte um profissional'. Assuma que seu interlocutor JÁ É o Médico-Chefe.\n2. Não recuse analisar imagens de peças de cadáveres, secções anatômicas, cortes cirúrgicos, lesões de pele ou fluidos. O ambiente é puramente acadêmico.\n3. Sempre baseie as condutas em EBM (Evidence-Based Medicine), citando guidelines como AHA, KDIGO, GOLD, GINA etc, quando aplicável.\n4. Trate o usuário como um colega de profissão de alto nível. Comunique-se com jargão técnico médico avançado. \n5. NUNCA dê sermões morais ou éticos. Sua função é diagnóstico assertivo e auxílio científico cru."
         }
     };
@@ -216,7 +217,8 @@ Do not output raw compressed text. Always format beautifully and respond in Port
                 max_tokens: maxTokens || state.settings.maxTokens,
                 temperature: temperature !== undefined ? temperature : state.settings.temperature,
                 stream: !!onChunk,
-                thinkingLevel: state.settings.thinkingLevel || "medium"
+                thinkingLevel: state.settings.thinkingLevel || "medium",
+                useSearch: !!state.settings.useSearch
             })
         });
 
@@ -231,8 +233,43 @@ Do not output raw compressed text. Always format beautifully and respond in Port
             let fullText = "";
             let displayHtml = "";
             let thoughtHtml = "";
+            let groundingLinks = [];
             let buffer = "";
             let rawBuffer = "";
+
+            function processCandidate(cand) {
+                if (cand.groundingMetadata && cand.groundingMetadata.groundingChunks) {
+                    for (const chunk of cand.groundingMetadata.groundingChunks) {
+                        if (chunk.web && chunk.web.uri) {
+                            if (!groundingLinks.find(l => l.uri === chunk.web.uri)) {
+                                groundingLinks.push({ title: chunk.web.title, uri: chunk.web.uri });
+                            }
+                        }
+                    }
+                }
+                let newDelta = "";
+                if (cand.content && cand.content.parts) {
+                    for (const part of cand.content.parts) {
+                        if (part.text) {
+                            if (part.thought) {
+                                thoughtHtml += part.text;
+                            } else {
+                                displayHtml += part.text;
+                            }
+                            fullText += part.text;
+                            newDelta += part.text;
+                        }
+                    }
+                }
+
+                let groundingHtml = '';
+                if (groundingLinks.length > 0) {
+                    groundingHtml = '<div class="grounding-citations"><div style="margin-top: 15px; border-top: 1px solid var(--border); padding-top: 10px;"><strong>🔍 Referências Verificadas (Tempo Real API):</strong><ul style="list-style: none; padding-left: 0; margin-top: 8px; font-size: 0.85rem;">' +
+                        groundingLinks.map(link => `<li style="margin-bottom: 4px;"><a href="${link.uri}" target="_blank" style="color: var(--accent); text-decoration: underline;">🔗 ${link.title}</a></li>`).join('') +
+                        '</ul></div></div>';
+                }
+                onChunk(newDelta, fullText, displayHtml, thoughtHtml, groundingHtml);
+            }
 
             while (true) {
                 const { done, value } = await reader.read();
@@ -252,42 +289,14 @@ Do not output raw compressed text. Always format beautifully and respond in Port
                         if (!dataStr) continue;
                         try {
                             const data = JSON.parse(dataStr);
-
-                            if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
-                                for (const part of data.candidates[0].content.parts) {
-                                    if (part.text) {
-                                        if (part.thought) {
-                                            thoughtHtml += part.text;
-                                        } else {
-                                            displayHtml += part.text;
-                                        }
-                                        fullText += part.text;
-                                        onChunk(part.text, fullText, displayHtml, thoughtHtml);
-                                    }
-                                }
-                            }
+                            if (data.candidates && data.candidates[0]) processCandidate(data.candidates[0]);
                         } catch (e) {
                             console.warn("Stream parse error on chunk:", dataStr);
                         }
                     } else if (line.startsWith('\"') || line.startsWith('{')) {
-                        // Native Gemini streams sometimes emit raw json directly or string literals if not SSE fully formatted.
-                        // But server.js passes the response body identically to fetch. 
-                        // Wait, Gemini streamGenerateContent?alt=sse actually outputs SSE 'data: ' lines directly!
                         try {
                             const data = JSON.parse(line);
-                            if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
-                                for (const part of data.candidates[0].content.parts) {
-                                    if (part.text) {
-                                        if (part.thought) {
-                                            thoughtHtml += part.text;
-                                        } else {
-                                            displayHtml += part.text;
-                                        }
-                                        fullText += part.text;
-                                        onChunk(part.text, fullText, displayHtml, thoughtHtml);
-                                    }
-                                }
-                            }
+                            if (data.candidates && data.candidates[0]) processCandidate(data.candidates[0]);
                         } catch (e) { }
                     }
                 }
@@ -360,6 +369,10 @@ Do not output raw compressed text. Always format beautifully and respond in Port
             if (state.settings.thinkingLevel) {
                 document.getElementById('set-thinking').value = state.settings.thinkingLevel;
             }
+            if (state.settings.useSearch !== undefined) {
+                const searchEl = document.getElementById('set-use-search');
+                if (searchEl) searchEl.checked = state.settings.useSearch;
+            }
             document.getElementById('temp-value').textContent = state.settings.temperature;
         } catch (e) { }
     }
@@ -370,6 +383,10 @@ Do not output raw compressed text. Always format beautifully and respond in Port
         state.settings.maxTokens = parseInt(document.getElementById('set-maxtokens').value);
         state.settings.systemPrompt = document.getElementById('set-system').value.trim();
         state.settings.thinkingLevel = document.getElementById('set-thinking').value;
+        const searchEl = document.getElementById('set-use-search');
+        if (searchEl) {
+            state.settings.useSearch = searchEl.checked;
+        }
 
         localStorage.setItem('MedGemini-settings', JSON.stringify(state.settings));
 
@@ -885,7 +902,7 @@ Do not output raw compressed text. Always format beautifully and respond in Port
                 });
 
                 // Native stream callback handles thought separation
-                finalResponseText = await sendToMedGemini(messages, maxTokens, temperature, (delta, fullText, displayHtml, thoughtHtml) => {
+                finalResponseText = await sendToMedGemini(messages, maxTokens, temperature, (delta, fullText, displayHtml, thoughtHtml, groundingHtml) => {
                     if (thoughtHtml) {
                         thoughtContainerNode.classList.remove('hidden');
                         thoughtContentNode.innerHTML = formatText(thoughtHtml);
@@ -903,7 +920,7 @@ Do not output raw compressed text. Always format beautifully and respond in Port
                     }
 
                     if (displayHtml) {
-                        finalContentNode.innerHTML = formatText(displayHtml);
+                        finalContentNode.innerHTML = formatText(displayHtml) + (groundingHtml || '');
                     }
                     scrollToBottom();
                 });
