@@ -208,69 +208,16 @@ Do not output raw compressed text. Always format beautifully and respond in Port
     // API
     // ============================================================
     async function sendToMedGemini(messages, maxTokens, temperature, onChunk) {
-        let apiKey = "AIzaSyCfkV5X8f4DETxszn0X4EQPvpXhO9xL614";
+        // Option B: Always use the secure Cloud Run Proxy backend so the actual API Key stays completely hidden.
+        const apiUrl = 'https://medgemma-proxy-927344461840.us-central1.run.app/api/chat';
         
-        // SECURE OVERRIDE: Allow user to pass their key via URL parameter to avoid GitHub revocation
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('key')) {
-            apiKey = urlParams.get('key');
-        }
-        const model = "gemini-3.1-pro-preview";
-        const stream = !!onChunk;
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:${stream ? 'streamGenerateContent?alt=sse' : 'generateContent'}?key=${apiKey}`;
-
-        // Format to Native Gemini format
-        const contents = [];
-        for (const msg of messages) {
-            if (msg.role === 'system') continue;
-            
-            const role = msg.role === 'user' ? 'user' : 'model';
-            let parts = [];
-
-            if (typeof msg.content === 'string') {
-                parts.push({ text: msg.content });
-            } else if (Array.isArray(msg.content)) {
-                for (const item of msg.content) {
-                    if (item.type === 'text') {
-                        parts.push({ text: item.text });
-                    } else if (item.type === 'image_url' && item.image_url && item.image_url.url) {
-                        const url = item.image_url.url;
-                        if (url.startsWith('data:')) {
-                            const [mimeInfo, base64Data] = url.split(',');
-                            const mimeType = mimeInfo.split(':')[1].split(';')[0];
-                            parts.push({
-                                inlineData: {
-                                    mimeType: mimeType,
-                                    data: base64Data
-                                }
-                            });
-                        }
-                    }
-                }
-            }
-            contents.push({ role, parts });
-        }
-
         const payload = {
-            contents: contents,
-            systemInstruction: {
-                parts: [{ text: state.settings.systemPrompt }]
-            },
-            generationConfig: {
-                maxOutputTokens: maxTokens || 2048,
-                temperature: temperature !== undefined ? temperature : 0.3,
-                thinkingConfig: {
-                    thinkingLevel: "high",
-                    includeThoughts: true
-                }
-            },
-            tools: [{ google_search: {} }],
-            safetySettings: [
-                { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-                { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-                { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
-                { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" }
-            ]
+            messages: messages,
+            max_tokens: maxTokens || 2048,
+            temperature: temperature !== undefined ? temperature : 0.3,
+            stream: !!onChunk,
+            thinkingLevel: "high",
+            useSearch: true
         };
 
         const res = await fetch(apiUrl, {

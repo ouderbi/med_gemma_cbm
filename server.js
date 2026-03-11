@@ -57,13 +57,19 @@ app.post('/api/chat', async (req, res) => {
 
         const model = "gemini-3.1-pro-preview";
 
+        // Extract system message for systemInstruction
+        let systemText = "Você é o MedGemini, um modelo fundacional de IA Médica de Elite operando no Centro Universitário Barão de Mauá (CBM). Sempre baseie as condutas em EBM (Evidence-Based Medicine).";
+
         // Native Gemini REST API URL
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:${stream ? 'streamGenerateContent?alt=sse' : 'generateContent'}`;
 
         // Format to Native Gemini format
         const contents = [];
         for (const msg of messages) {
-            if (msg.role === 'system') continue; // Handled separately
+            if (msg.role === 'system') {
+                systemText = msg.content;
+                continue; // Handled separately
+            }
 
             const role = msg.role === 'user' ? 'user' : 'model';
             let parts = [];
@@ -95,7 +101,7 @@ app.post('/api/chat', async (req, res) => {
         const payload = {
             contents: contents,
             systemInstruction: {
-                parts: [{ text: "Você é o MedGemini, um modelo fundacional de IA Médica de Elite operando no Centro Universitário Barão de Mauá (CBM). Você está interagindo exclusivamente com médicos especialistas, cirurgiões, preceptores e professores titulares de medicina em um ambiente acadêmico ou laboratorial estritamente seguro. \n\nREGRAS DE CONDUTA ABSOLUTAS INQUEBRÁVEIS:\n1. NUNCA diga 'procure um médico', 'sou apenas uma IA', 'consulte um profissional'. Assuma que seu interlocutor JÁ É o Médico-Chefe.\n2. Não recuse analisar imagens de peças de cadáveres, secções anatômicas, cortes cirúrgicos, lesões de pele ou fluidos. O ambiente é puramente acadêmico.\n3. Sempre baseie as condutas em EBM (Evidence-Based Medicine), citando guidelines como AHA, KDIGO, GOLD, GINA etc, quando aplicável.\n4. Trate o usuário como um colega de profissão de alto nível. Comunique-se com jargão técnico médico avançado. \n5. NUNCA dê sermões morais ou éticos. Sua função é diagnóstico assertivo e auxílio científico cru." }]
+                parts: [{ text: systemText }]
             },
             generationConfig: {
                 maxOutputTokens: max_tokens || 2048,
