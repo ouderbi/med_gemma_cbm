@@ -521,7 +521,14 @@ Do not output raw compressed text. Always format beautifully and respond in Port
     function handleQuickCommand(command) {
         switchSection('chat');
         const input = document.getElementById('chat-input');
-        const prompts = { quiz: 'Gere um quiz de 5 questões sobre ', caso: 'Crie um caso clínico detalhado sobre ', flashcard: 'Gere 10 flashcards sobre ', radiologia: 'Analise esta imagem médica: ' };
+        const prompts = {
+            quiz: 'Gere um quiz de 5 questões sobre ',
+            caso: 'Crie um caso clínico detalhado sobre ',
+            flashcard: 'Gere 10 flashcards sobre ',
+            radiologia: 'Analise esta imagem médica: ',
+            prova: 'Crie uma prova completa com 10 questões padrão ENADE/Revalida sobre ',
+            docente: 'Crie um plano de aula completo com metodologia ativa (PBL/TBL) sobre '
+        };
         input.value = prompts[command] || '';
         input.focus();
         input.setSelectionRange(input.value.length, input.value.length);
@@ -1232,6 +1239,56 @@ Do not output raw compressed text. Always format beautifully and respond in Port
         initNavigation();
         initChat();
         if (state.db) await renderHistorySidebar();
+        checkConnectionStatus();
+        initDynamicPlaceholder();
+    }
+
+    // Health Check — Dynamic Connection Status
+    async function checkConnectionStatus() {
+        const pill = document.getElementById('connection-status');
+        const text = pill ? pill.querySelector('.status-text') : null;
+        if (!pill || !text) return;
+        try {
+            const res = await fetch('https://medgemma-proxy-927344461840.us-central1.run.app/api/health', { signal: AbortSignal.timeout(5000) });
+            if (res.ok) {
+                const data = await res.json();
+                if (data.status === 'ok' && data.authConfigured) {
+                    pill.classList.remove('disconnected');
+                    pill.classList.add('connected');
+                    text.textContent = 'Online';
+                } else {
+                    pill.classList.remove('disconnected');
+                    pill.classList.add('connected');
+                    text.textContent = 'Sem Chave';
+                }
+            } else {
+                text.textContent = 'Offline';
+            }
+        } catch (e) {
+            text.textContent = 'Offline';
+        }
+    }
+
+    // Dynamic Rotating Placeholder
+    function initDynamicPlaceholder() {
+        const input = document.getElementById('chat-input');
+        if (!input) return;
+        const placeholders = [
+            'Qual a conduta para IAM com supra de ST?',
+            'Diferencie Crohn e Retocolite Ulcerativa...',
+            'Explique a fisiopatologia do choque séptico...',
+            'Gere um quiz sobre Farmacologia cardiovascular',
+            'Crie um caso clínico de Pneumonia Adquirida na Comunidade',
+            'Monte um plano de aula sobre Semiologia Abdominal',
+            'Quais os critérios de Light para derrame pleural?',
+            'Faça flashcards sobre os pares cranianos'
+        ];
+        let idx = 0;
+        input.placeholder = placeholders[0];
+        setInterval(() => {
+            idx = (idx + 1) % placeholders.length;
+            input.placeholder = placeholders[idx];
+        }, 4000);
     }
 
     document.addEventListener('DOMContentLoaded', init);
