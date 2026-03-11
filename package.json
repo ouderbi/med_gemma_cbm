@@ -1,7 +1,7 @@
 {
-  "name": "medgemma-cbm",
+  "name": "medgemini-cbm",
   "version": "1.0.0",
-  "description": "MedGemma 27B Interactive Medical AI Platform",
+  "description": "MedGemini 27B Interactive Medical AI Platform",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

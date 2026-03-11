@@ -1,7 +1,7 @@
 """
-MedGemma CBM — Análise de CT Scan (ULTRA-ROBUSTA V2)
+MedGemini CBM — Análise de CT Scan (ULTRA-ROBUSTA V2)
 ================================================
-Configurado para OPERAÇÃO MÁXIMA do MedGemma 27B.
+Configurado para OPERAÇÃO MÁXIMA do MedGemini 27B.
 Laudo de nível Acadêmico Especialista Sênior.
 
 Melhorias da V2:
@@ -34,7 +34,7 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s",
     datefmt="%H:%M:%S"
 )
-logger = logging.getLogger("MedGemma")
+logger = logging.getLogger("MedGemini")
 
 try:
     from google.cloud import aiplatform
@@ -110,7 +110,7 @@ def split_into_batches(images: List[str], max_payload_bytes: float) -> List[List
 
 # Decorador de Retry: Tenta até 5 vezes, esperando progressivamente (2s, 4s, 8s...) em caso de erro na API
 @retry(wait=wait_exponential(multiplier=1, min=2, max=10), stop=stop_after_attempt(5))
-def call_medgemma_sdk(endpoint: aiplatform.Endpoint, messages: List[Dict], max_tokens: int = 8192) -> Optional[str]:
+def call_medgemini_sdk(endpoint: aiplatform.Endpoint, messages: List[Dict], max_tokens: int = 8192) -> Optional[str]:
     """Chamada robusta usando o SDK da Vertex AI com tentativa automática em caso de falha."""
     instance = {
         "@requestFormat": "chatCompletions",
@@ -200,10 +200,10 @@ def analyze_progressive(images: List[str], batches: List[List[str]], endpoint: a
         content.append({"type": "text", "text": prompt})
         messages = [{"role": "user", "content": content}]
 
-        logger.info(f"🛰️ Transmitindo ao MedGemma 27B...")
+        logger.info(f"🛰️ Transmitindo ao MedGemini 27B...")
         
         try:
-            result = call_medgemma_sdk(endpoint, messages)
+            result = call_medgemini_sdk(endpoint, messages)
             if result:
                 clinical_memory = result
                 logger.info(f"🎯 Lote {idx+1} integrado com sucesso.")
@@ -226,12 +226,12 @@ def analyze_progressive(images: List[str], batches: List[List[str]], endpoint: a
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Análise Ultra-Robusta de CT Scan via MedGemma')
+    parser = argparse.ArgumentParser(description='Análise Ultra-Robusta de CT Scan via MedGemini')
     parser.add_argument('path', help='Caminho para o arquivo ZIP ou pasta contendo as imagens')
     args = parser.parse_args()
 
     print("\n" + "⚡"*30)
-    print("  MEDGEMMA 27B - MODO DE OPERAÇÃO MÁXIMA V2")
+    print("  MEDGEMINI 27B - MODO DE OPERAÇÃO MÁXIMA V2")
     print("⚡"*30 + "\n")
 
     # Iniciar SDK
@@ -269,9 +269,9 @@ def main():
             print("🚨"*30 + "\n")
             print(final_report)
             
-            output_file = Path(args.path).parent / "LAUDO_ESPECIALISTA_MEDGEMMA_27B.txt"
+            output_file = Path(args.path).parent / "LAUDO_ESPECIALISTA_MEDGEMINI_27B.txt"
             with open(output_file, 'w', encoding='utf-8') as f:
-                f.write(f"LAUDO RADIOLÓGICO - MEDGEMMA 27B EXPERT\n")
+                f.write(f"LAUDO RADIOLÓGICO - MEDGEMINI 27B EXPERT\n")
                 f.write(f"NÚMERO DE FATIAS: {len(images)}\n")
                 f.write("="*60 + "\n\n")
                 f.write(final_report)
