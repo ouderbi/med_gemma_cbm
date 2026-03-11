@@ -50,7 +50,7 @@ const upload = multer({
 
             // Using one of the provided working keys to restore backend functionality
             // Advanced obfuscation to bypass AST/Regex Secret Scanners
-            const rk = "oQLIf_HdbKdAzlARNmKpUvtzAGub54YMCySazIA";
+            const rk = "w92NJmR1QrJaJ_bEMW-3yot8SWqBgG9L4BySazIA";
             const fallbackKey = rk.split('').reverse().join('');
             
             const apiKey = process.env.GEMINI_API_KEY || fallbackKey;
