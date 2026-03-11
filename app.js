@@ -880,10 +880,13 @@ Do not output raw compressed text. Always format beautifully and respond in Port
                         // If there is displayHtml, it means thoughts have finished and actual answer is streaming
                         if (displayHtml) {
                             thoughtContainerNode.classList.add('finished');
+                            thoughtContainerNode.classList.remove('expanded'); // Auto-collapse when done
                             thoughtHeaderNode.innerHTML = `<span>🧠</span> Processo Estratégico Concluído (Ver Raciocínio)`;
                         } else {
+                            // Auto-expand during streaming so user sees reasoning in real-time
                             thoughtContainerNode.classList.remove('finished');
-                            thoughtHeaderNode.innerHTML = `<span class="thought-spinner">⚙️</span> Acessando Córtex Profundo...`;
+                            thoughtContainerNode.classList.add('expanded');
+                            thoughtHeaderNode.innerHTML = `<span class="thought-spinner">⚙️</span> Raciocínio em Tempo Real...`;
                         }
                     } else {
                         thoughtContainerNode.classList.add('hidden');
