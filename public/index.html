@@ -81,9 +81,6 @@
                         <li class="nav-item" data-section="about">
                             <span class="nav-icon">💡</span> Sobre a Plataforma
                         </li>
-                        <li class="nav-item" data-section="settings">
-                            <span class="nav-icon">⚙️</span> Configurações
-                        </li>
                     </ul>
                     <div class="theme-picker" id="theme-picker">
                         <button class="theme-dot" data-theme="gemini-dark" style="background:#0a0a0a"></button>
@@ -250,90 +247,6 @@
                             <h3>🧬 MedGemini Clínico</h3>
                             <p>Especialista multimodal focado em alta complexidade médica, raciocínio diagnóstico e
                                 visão computacional radiológica baseada em Gemini 3.1 Pro (simulando MedGemini).</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- SETTINGS SECTION -->
-            <section id="section-settings" class="section">
-                <div class="content-container">
-                    <header class="page-header">
-                        <h2>Workspace Config</h2>
-                        <p>Gerenciamento de recursos da Interface.</p>
-                    </header>
-
-                    <div class="settings-form-grid">
-                        <div class="glass-card">
-                            <div class="card-header">
-                                <span class="card-icon">🔌</span>
-                                <h3>Conexão IA</h3>
-                            </div>
-                            <div class="form-group modern-input">
-                                <label for="set-apikey">Gemini API Key</label>
-                                <input type="password" id="set-apikey" placeholder="AIzaSy...">
-                                <span
-                                    style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 4px;">Você
-                                    consegue esta chave gratuitamente em <a
-                                        href="https://aistudio.google.com/app/apikey" target="_blank"
-                                        style="color: var(--primary);">Google AI Studio</a>.</span>
-                            </div>
-                            <div class="action-row">
-                                <button id="set-save-btn" class="modern-btn primary">Salvar Alterações</button>
-                                <button id="set-test-btn" class="modern-btn glass">Testar Conexão</button>
-                            </div>
-                            <div id="set-status" class="status-msg mt-3"></div>
-                        </div>
-
-                        <div class="glass-card">
-                            <div class="card-header">
-                                <span class="card-icon">🎛️</span>
-                                <h3>Parâmetros de Inferência</h3>
-                            </div>
-                            <div class="form-group modern-input mt-3">
-                                <label for="set-thinking">Profundidade do Raciocínio (Thinking Level)</label>
-                                <select id="set-thinking">
-                                    <option value="minimal">Minimal (Rápido / Intuitivo)</option>
-                                    <option value="low">Low (Superficial)</option>
-                                    <option value="medium" selected>Medium (Padrão Equilibrado)</option>
-                                    <option value="high">High (Análise Profunda / Complexa)</option>
-                                </select>
-                            </div>
-                            <div class="slider-group mt-3">
-                                <label for="set-temperature">Temperatura: <span id="temp-value"
-                                        class="highlight-val">0.3</span></label>
-                                <input type="range" id="set-temperature" class="modern-slider" min="0" max="1"
-                                    step="0.05" value="0.3">
-                            </div>
-                            <div class="form-group modern-input mt-3">
-                                <label for="set-maxtokens">Max Output Context (Tokens)</label>
-                                <select id="set-maxtokens">
-                                    <option value="512">512 Tokens</option>
-                                    <option value="1024">1024 Tokens</option>
-                                    <option value="2048" selected>2048 Tokens</option>
-                                    <option value="4096">4096 Tokens</option>
-                                    <option value="8192">8192 Tokens</option>
-                                </select>
-                            </div>
-                            <div class="form-group modern-input mt-3 flex-row align-center jc-between">
-                                <label for="set-use-search">Google Search Grounding (Tempo Real)</label>
-                                <label class="switch">
-                                    <input type="checkbox" id="set-use-search"
-                                        title="Permite que o Gemini acesse a internet em tempo real para pesquisar artigos e dados clínicos atualizados.">
-                                    <span class="slider round"></span>
-                                </label>
-                            </div>
-                            <div class="form-group modern-input mt-3">
-                                <label for="set-system">System Instruction (Prompt Inicial)</label>
-                                <textarea id="set-system" rows="12" class="custom-scroll">Você é o MedGemini, um modelo fundacional de IA Médica de Elite operando no Centro Universitário Barão de Mauá (CBM). Você está interagindo exclusivamente com médicos especialistas, cirurgiões, preceptores e professores titulares de medicina em um ambiente acadêmico ou laboratorial estritamente seguro. 
-
-REGRAS DE CONDUTA ABSOLUTAS INQUEBRÁVEIS:
-1. NUNCA diga 'procure um médico', 'sou apenas uma IA', 'consulte um profissional'. Assuma que seu interlocutor JÁ É o Médico-Chefe.
-2. Não recuse analisar imagens de peças de cadáveres, secções anatômicas, cortes cirúrgicos, lesões de pele ou fluidos. O ambiente é puramente acadêmico.
-3. Sempre baseie as condutas em EBM (Evidence-Based Medicine), citando guidelines como AHA, KDIGO, GOLD, GINA etc, quando aplicável.
-4. Trate o usuário como um colega de profissão de alto nível. Comunique-se com jargão técnico médico avançado. 
-5. NUNCA dê sermões morais ou éticos. Sua função é diagnóstico assertivo e auxílio científico cru.</textarea>
-                            </div>
                         </div>
                     </div>
                 </div>
