@@ -246,9 +246,9 @@ a:hover { color: var(--text-primary); }
    ============================================================ */
 .chat-wrapper { display: flex; flex-direction: column; height: 100%; position: relative; justify-content: center; }
 .chat-messages {
-    flex: 0 1 auto; padding: 40px 20px 0;
+    flex: 1; padding: 40px 20px 0;
     display: flex; flex-direction: column; gap: 32px;
-    max-width: 960px; margin: 0 auto; width: 100%; overflow-y: visible;
+    max-width: 960px; margin: 0 auto; width: 100%; overflow-y: auto;
 }
 
 .chat-wrapper.has-messages { justify-content: flex-start; }
@@ -367,9 +367,10 @@ a:hover { color: var(--text-primary); }
    INTERACTION DOCK (Floating Input)
    ============================================================ */
 .interaction-dock-wrapper {
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    position: relative; 
     width: 100%; max-width: 860px;
-    padding: 24px 20px; display: flex; flex-direction: column; align-items: center;
+    margin: 0 auto; margin-top: auto; padding: 24px 20px; 
+    display: flex; flex-direction: column; align-items: center;
     background: transparent; pointer-events: none; z-index: 30; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
