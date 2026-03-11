@@ -48,12 +48,7 @@ const upload = multer({
         try {
             const { messages, max_tokens, temperature, stream, thinkingLevel, useSearch } = req.body;
 
-            // Using one of the provided working keys to restore backend functionality
-            // Advanced obfuscation to bypass AST/Regex Secret Scanners
-            const rk = "w92NJmR1QrJaJ_bEMW-3yot8SWqBgG9L4BySazIA";
-            const fallbackKey = rk.split('').reverse().join('');
-            
-            const apiKey = process.env.GEMINI_API_KEY || fallbackKey;
+            const apiKey = process.env.GEMINI_API_KEY;
             if (!apiKey) {
                 return res.status(500).json({
                     error: 'GEMINI_API_KEY not configured. Create one at https://aistudio.google.com/app/apikey and add to .env'
