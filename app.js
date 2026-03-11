@@ -973,6 +973,102 @@ Use spoiler:true apenas para a resolução final do caso (Diagnóstico Definitiv
         } catch (e) { return null; }
     }
 
+    function renderStructuredMessage(data) {
+        const msgs = document.getElementById('chat-messages');
+        const div = document.createElement('div');
+        div.className = 'message assistant';
+        div.style.animation = 'none';
+
+        if (data.type === 'quiz') {
+            let html = `<div class="message-avatar">🧬</div><div class="message-content"><div class="structured-widget quiz-widget">`;
+            html += `<h2 class="widget-title">🧠 ${esc(data.title || 'Quiz')}</h2>`;
+            if (data.questions && data.questions.length) {
+                data.questions.forEach((q, qi) => {
+                    html += `<div class="quiz-question" data-qi="${qi}">`;
+                    html += `<p class="quiz-q-text"><strong>Questão ${qi + 1}:</strong> ${formatText(q.question)}</p>`;
+                    html += `<div class="quiz-options">`;
+                    if (q.options && q.options.length) {
+                        q.options.forEach((opt, oi) => {
+                            html += `<button class="quiz-option" data-qi="${qi}" data-oi="${oi}" data-correct="${oi === q.correct ? '1' : '0'}">${esc(opt)}</button>`;
+                        });
+                    }
+                    html += `</div>`;
+                    html += `<div class="quiz-explanation hidden"><strong>Explicação:</strong> ${formatText(q.explanation || '')}</div>`;
+                    html += `</div>`;
+                });
+            }
+            html += `</div></div>`;
+            div.innerHTML = html;
+
+            // Attach click handlers for quiz options
+            setTimeout(() => {
+                div.querySelectorAll('.quiz-option').forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        const qDiv = this.closest('.quiz-question');
+                        if (qDiv.classList.contains('answered')) return;
+                        qDiv.classList.add('answered');
+                        const isCorrect = this.dataset.correct === '1';
+                        this.classList.add(isCorrect ? 'correct' : 'wrong');
+                        // Highlight the correct answer
+                        qDiv.querySelectorAll('.quiz-option').forEach(b => {
+                            if (b.dataset.correct === '1') b.classList.add('correct');
+                            b.disabled = true;
+                        });
+                        qDiv.querySelector('.quiz-explanation').classList.remove('hidden');
+                    });
+                });
+            }, 100);
+
+        } else if (data.type === 'flashcards') {
+            let html = `<div class="message-avatar">🧬</div><div class="message-content"><div class="structured-widget flashcard-widget">`;
+            html += `<h2 class="widget-title">🃏 ${esc(data.title || 'Flashcards')}</h2>`;
+            html += `<div class="flashcard-deck">`;
+            if (data.cards && data.cards.length) {
+                data.cards.forEach((card, ci) => {
+                    html += `<div class="flashcard" data-ci="${ci}">`;
+                    html += `<div class="flashcard-inner">`;
+                    html += `<div class="flashcard-front"><span class="fc-number">${ci + 1}/${data.cards.length}</span>${formatText(card.front)}</div>`;
+                    html += `<div class="flashcard-back">${formatText(card.back)}</div>`;
+                    html += `</div></div>`;
+                });
+            }
+            html += `</div></div></div>`;
+            div.innerHTML = html;
+
+            setTimeout(() => {
+                div.querySelectorAll('.flashcard').forEach(fc => {
+                    fc.addEventListener('click', function () {
+                        this.classList.toggle('flipped');
+                    });
+                });
+            }, 100);
+
+        } else if (data.type === 'case_study') {
+            let html = `<div class="message-avatar">🧬</div><div class="message-content"><div class="structured-widget case-widget">`;
+            html += `<h2 class="widget-title">📋 ${esc(data.title || 'Caso Clínico')}</h2>`;
+            if (data.sections && data.sections.length) {
+                data.sections.forEach((sec, si) => {
+                    if (sec.spoiler) {
+                        html += `<details class="case-spoiler"><summary>🔒 ${esc(sec.heading || 'Resolução')}</summary>`;
+                        html += `<div class="case-section-content">${formatText(sec.content)}</div></details>`;
+                    } else {
+                        html += `<div class="case-section">`;
+                        html += `<h3>${esc(sec.heading)}</h3>`;
+                        html += `<div class="case-section-content">${formatText(sec.content)}</div>`;
+                        html += `</div>`;
+                    }
+                });
+            }
+            html += `</div></div>`;
+            div.innerHTML = html;
+        }
+
+        msgs.appendChild(div);
+        void div.offsetWidth;
+        div.style.animation = '';
+        scrollToBottom();
+    }
+
     // ============================================================
     // Message Rendering
     // ============================================================
